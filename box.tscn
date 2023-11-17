@@ -1,0 +1,13 @@
+[gd_scene load_steps=3 format=3 uid="uid://bayk2fbneen6n"]
+
+[sub_resource type="Gradient" id="Gradient_d2yfj"]
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_ehv1l"]
+gradient = SubResource("Gradient_d2yfj")
+
+[node name="Box" type="Node2D"]
+
+[node name="Polygon2D" type="Polygon2D" parent="."]
+position = Vector2(-430, -282)
+texture = SubResource("GradientTexture1D_ehv1l")
+polygon = PackedVector2Array(378, 228, 520, 237, 486, 356, 345, 324)

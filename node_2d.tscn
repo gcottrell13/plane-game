@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=3 uid="uid://clw1fcci3j7ea"]
+
+[ext_resource type="PackedScene" uid="uid://bayk2fbneen6n" path="res://box.tscn" id="1_3o6yh"]
+[ext_resource type="Script" path="res://box.gd" id="2_raes1"]
+
+[node name="Node2D" type="Node2D"]
+
+[node name="Box" parent="." instance=ExtResource("1_3o6yh")]
+position = Vector2(581, 287)
+script = ExtResource("2_raes1")
+GRAVITY = 2.0
