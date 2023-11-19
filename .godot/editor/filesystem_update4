@@ -1,3 +1,5 @@
+res://dragon-char.tscn
+res://dragon-char.gd
 res://node_2d.tscn
-res://box.gd
 res://box.tscn
+res://floor.tscn

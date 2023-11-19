@@ -1,0 +1,314 @@
+[gd_scene load_steps=43 format=3 uid="uid://b5h6i6q8wvrja"]
+
+[ext_resource type="Script" path="res://dragon-char.gd" id="1_gbbou"]
+[ext_resource type="Texture2D" uid="uid://y7j4nqg5vdk" path="res://dragon_black.png" id="1_n56c8"]
+[ext_resource type="Script" path="res://addons/imjp94.yafsm/src/StateMachinePlayer.gd" id="3_oj1qi"]
+[ext_resource type="Script" path="res://addons/imjp94.yafsm/src/states/StateMachine.gd" id="4_th5bb"]
+[ext_resource type="Script" path="res://addons/imjp94.yafsm/src/states/State.gd" id="5_56bwe"]
+[ext_resource type="Script" path="res://addons/imjp94.yafsm/src/transitions/Transition.gd" id="6_4e6oo"]
+[ext_resource type="Script" path="res://addons/imjp94.yafsm/src/conditions/Condition.gd" id="7_agbcw"]
+[ext_resource type="Script" path="res://addons/imjp94.yafsm/src/conditions/BooleanCondition.gd" id="7_fnitb"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_8udjb"]
+size = Vector2(64, 64)
+
+[sub_resource type="Animation" id="Animation_2vmig"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [0]
+}
+
+[sub_resource type="Animation" id="Animation_u4mjk"]
+resource_name = "glide"
+length = 0.4
+loop_mode = 1
+step = 0.05
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [11, 12, 13, 14, 15, 16, 17, 18]
+}
+
+[sub_resource type="Animation" id="Animation_i55st"]
+resource_name = "hover"
+length = 0.4
+loop_mode = 1
+step = 0.05
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [0, 1, 2, 3, 4, 5, 6, 7]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_72566"]
+_data = {
+"RESET": SubResource("Animation_2vmig"),
+"glide": SubResource("Animation_u4mjk"),
+"hover": SubResource("Animation_i55st")
+}
+
+[sub_resource type="Resource" id="Resource_20h0f"]
+script = ExtResource("5_56bwe")
+name = "Cling"
+metadata/graph_offset = Vector2(1206, 42)
+
+[sub_resource type="Resource" id="Resource_lsjyr"]
+script = ExtResource("5_56bwe")
+name = "Entry"
+metadata/graph_offset = Vector2(566, 102)
+
+[sub_resource type="Resource" id="Resource_ma1t7"]
+script = ExtResource("5_56bwe")
+name = "Glide"
+metadata/graph_offset = Vector2(1406, 342)
+
+[sub_resource type="Resource" id="Resource_d5gry"]
+script = ExtResource("5_56bwe")
+name = "Hover"
+metadata/graph_offset = Vector2(846, 182)
+
+[sub_resource type="Resource" id="Resource_pnws4"]
+script = ExtResource("5_56bwe")
+name = "Jump"
+metadata/graph_offset = Vector2(306, 42)
+
+[sub_resource type="Resource" id="Resource_ilf3a"]
+script = ExtResource("5_56bwe")
+name = "Walk"
+metadata/graph_offset = Vector2(146, 342)
+
+[sub_resource type="Resource" id="Resource_fflak"]
+script = ExtResource("5_56bwe")
+name = "Falling"
+metadata/graph_offset = Vector2(566, 182)
+
+[sub_resource type="Resource" id="Resource_5w0fi"]
+script = ExtResource("7_agbcw")
+name = "jump"
+
+[sub_resource type="Resource" id="Resource_853qw"]
+script = ExtResource("6_4e6oo")
+from = "Cling"
+to = "Jump"
+conditions = {
+"jump": SubResource("Resource_5w0fi")
+}
+priority = 0
+
+[sub_resource type="Resource" id="Resource_656kx"]
+script = ExtResource("7_agbcw")
+name = "cling"
+
+[sub_resource type="Resource" id="Resource_boyam"]
+script = ExtResource("6_4e6oo")
+from = "Glide"
+to = "Cling"
+conditions = {
+"cling": SubResource("Resource_656kx")
+}
+priority = 0
+
+[sub_resource type="Resource" id="Resource_jbs7c"]
+script = ExtResource("7_fnitb")
+value = true
+comparation = 0
+name = "on_floor"
+
+[sub_resource type="Resource" id="Resource_dw4iu"]
+script = ExtResource("6_4e6oo")
+from = "Glide"
+to = "Walk"
+conditions = {
+"on_floor": SubResource("Resource_jbs7c")
+}
+priority = 0
+
+[sub_resource type="Resource" id="Resource_8xqx7"]
+script = ExtResource("7_agbcw")
+name = "cling"
+
+[sub_resource type="Resource" id="Resource_2mahv"]
+script = ExtResource("6_4e6oo")
+from = "Hover"
+to = "Cling"
+conditions = {
+"cling": SubResource("Resource_8xqx7")
+}
+priority = 0
+
+[sub_resource type="Resource" id="Resource_8ba32"]
+script = ExtResource("7_agbcw")
+name = "glide"
+
+[sub_resource type="Resource" id="Resource_bh2iq"]
+script = ExtResource("6_4e6oo")
+from = "Hover"
+to = "Glide"
+conditions = {
+"glide": SubResource("Resource_8ba32")
+}
+priority = 0
+
+[sub_resource type="Resource" id="Resource_wxgau"]
+script = ExtResource("7_fnitb")
+value = true
+comparation = 0
+name = "on_floor"
+
+[sub_resource type="Resource" id="Resource_kd8oy"]
+script = ExtResource("6_4e6oo")
+from = "Hover"
+to = "Walk"
+conditions = {
+"on_floor": SubResource("Resource_wxgau")
+}
+priority = 0
+
+[sub_resource type="Resource" id="Resource_g1kpv"]
+script = ExtResource("7_agbcw")
+name = "jump"
+
+[sub_resource type="Resource" id="Resource_c1ytx"]
+script = ExtResource("6_4e6oo")
+from = "Walk"
+to = "Jump"
+conditions = {
+"jump": SubResource("Resource_g1kpv")
+}
+priority = 0
+
+[sub_resource type="Resource" id="Resource_3p7sv"]
+script = ExtResource("7_agbcw")
+name = "animation_finish"
+
+[sub_resource type="Resource" id="Resource_kh2x6"]
+script = ExtResource("6_4e6oo")
+from = "Jump"
+to = "Falling"
+conditions = {
+"animation_finish": SubResource("Resource_3p7sv")
+}
+priority = 0
+
+[sub_resource type="Resource" id="Resource_kexvh"]
+script = ExtResource("7_fnitb")
+value = true
+comparation = 0
+name = "is_jumping"
+
+[sub_resource type="Resource" id="Resource_itwi7"]
+script = ExtResource("6_4e6oo")
+from = "Falling"
+to = "Hover"
+conditions = {
+"is_jumping": SubResource("Resource_kexvh")
+}
+priority = 0
+
+[sub_resource type="Resource" id="Resource_fmlsn"]
+script = ExtResource("7_fnitb")
+value = true
+comparation = 0
+name = "on_floor"
+
+[sub_resource type="Resource" id="Resource_sq0ja"]
+script = ExtResource("6_4e6oo")
+from = "Falling"
+to = "Walk"
+conditions = {
+"on_floor": SubResource("Resource_fmlsn")
+}
+priority = 0
+
+[sub_resource type="Resource" id="Resource_eiyla"]
+script = ExtResource("6_4e6oo")
+from = "Entry"
+to = "Falling"
+conditions = {}
+priority = 0
+
+[sub_resource type="Resource" id="Resource_oxabw"]
+script = ExtResource("4_th5bb")
+states = {
+"Cling": SubResource("Resource_20h0f"),
+"Entry": SubResource("Resource_lsjyr"),
+"Falling": SubResource("Resource_fflak"),
+"Glide": SubResource("Resource_ma1t7"),
+"Hover": SubResource("Resource_d5gry"),
+"Jump": SubResource("Resource_pnws4"),
+"Walk": SubResource("Resource_ilf3a")
+}
+transitions = {
+"Cling": {
+"Jump": SubResource("Resource_853qw")
+},
+"Entry": {
+"Falling": SubResource("Resource_eiyla")
+},
+"Falling": {
+"Hover": SubResource("Resource_itwi7"),
+"Walk": SubResource("Resource_sq0ja")
+},
+"Glide": {
+"Cling": SubResource("Resource_boyam"),
+"Walk": SubResource("Resource_dw4iu")
+},
+"Hover": {
+"Cling": SubResource("Resource_2mahv"),
+"Glide": SubResource("Resource_bh2iq"),
+"Walk": SubResource("Resource_kd8oy")
+},
+"Jump": {
+"Falling": SubResource("Resource_kh2x6")
+},
+"Walk": {
+"Jump": SubResource("Resource_c1ytx")
+}
+}
+name = ""
+
+[node name="CharacterBody2D" type="CharacterBody2D"]
+script = ExtResource("1_gbbou")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("1_n56c8")
+hframes = 11
+vframes = 7
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_8udjb")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+"": SubResource("AnimationLibrary_72566")
+}
+
+[node name="StateMachinePlayer" type="Node" parent="."]
+script = ExtResource("3_oj1qi")
+state_machine = SubResource("Resource_oxabw")
+
+[connection signal="transited" from="StateMachinePlayer" to="." method="on_transit_state"]
+[connection signal="updated" from="StateMachinePlayer" to="." method="_on_smp_updated"]

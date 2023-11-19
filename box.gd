@@ -1,19 +1,17 @@
 extends Node2D
 
-var dy: float = 0;
-@export var GRAVITY: float = 1;
-
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	pass # Replace with function body.
-
+	pass
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
+
 func _process(delta):
-	dy += delta * GRAVITY;
-	move_local_y(dy);
-	
-	var height = DisplayServer.window_get_size(0).y
-	if self.global_position.y >= height:
-		dy = -abs(dy);
-		self.global_position.y = height;
+	var parent = get_parent();
+	var floor: Node = parent.get_parent().get_node("floor");
+	var diff = floor.position - self.position;
+	if diff.length() > 1000:
+		parent.remove_child(self)
+
+func _draw():
+	draw_circle(Vector2(0, 0), 50, Color.RED);
