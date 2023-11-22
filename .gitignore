@@ -8,3 +8,12 @@ export_presets.cfg
 .mono/
 
 *.cache
+
+.godot/editor/script_editor_cache.cfg
+
+.godot/editor/filesystem_cache8
+.godot/editor/filesystem_update4
+
+.godot/editor/create_recent.Node
+
+.godot/editor/editor_layout.cfg

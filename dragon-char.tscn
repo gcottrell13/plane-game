@@ -80,6 +80,11 @@ script = ExtResource("5_56bwe")
 name = "Entry"
 metadata/graph_offset = Vector2(566, 102)
 
+[sub_resource type="Resource" id="Resource_fflak"]
+script = ExtResource("5_56bwe")
+name = "Falling"
+metadata/graph_offset = Vector2(566, 182)
+
 [sub_resource type="Resource" id="Resource_ma1t7"]
 script = ExtResource("5_56bwe")
 name = "Glide"
@@ -100,11 +105,6 @@ script = ExtResource("5_56bwe")
 name = "Walk"
 metadata/graph_offset = Vector2(146, 342)
 
-[sub_resource type="Resource" id="Resource_fflak"]
-script = ExtResource("5_56bwe")
-name = "Falling"
-metadata/graph_offset = Vector2(566, 182)
-
 [sub_resource type="Resource" id="Resource_5w0fi"]
 script = ExtResource("7_agbcw")
 name = "jump"
@@ -115,6 +115,43 @@ from = "Cling"
 to = "Jump"
 conditions = {
 "jump": SubResource("Resource_5w0fi")
+}
+priority = 0
+
+[sub_resource type="Resource" id="Resource_eiyla"]
+script = ExtResource("6_4e6oo")
+from = "Entry"
+to = "Falling"
+conditions = {}
+priority = 0
+
+[sub_resource type="Resource" id="Resource_kexvh"]
+script = ExtResource("7_fnitb")
+value = true
+comparation = 0
+name = "is_jumping"
+
+[sub_resource type="Resource" id="Resource_itwi7"]
+script = ExtResource("6_4e6oo")
+from = "Falling"
+to = "Hover"
+conditions = {
+"is_jumping": SubResource("Resource_kexvh")
+}
+priority = 0
+
+[sub_resource type="Resource" id="Resource_fmlsn"]
+script = ExtResource("7_fnitb")
+value = true
+comparation = 0
+name = "on_floor"
+
+[sub_resource type="Resource" id="Resource_sq0ja"]
+script = ExtResource("6_4e6oo")
+from = "Falling"
+to = "Walk"
+conditions = {
+"on_floor": SubResource("Resource_fmlsn")
 }
 priority = 0
 
@@ -187,6 +224,21 @@ conditions = {
 }
 priority = 0
 
+[sub_resource type="Resource" id="Resource_4suhf"]
+script = ExtResource("7_fnitb")
+value = true
+comparation = 0
+name = "facing_down"
+
+[sub_resource type="Resource" id="Resource_kh2x6"]
+script = ExtResource("6_4e6oo")
+from = "Jump"
+to = "Falling"
+conditions = {
+"facing_down": SubResource("Resource_4suhf")
+}
+priority = 0
+
 [sub_resource type="Resource" id="Resource_g1kpv"]
 script = ExtResource("7_agbcw")
 name = "jump"
@@ -198,56 +250,6 @@ to = "Jump"
 conditions = {
 "jump": SubResource("Resource_g1kpv")
 }
-priority = 0
-
-[sub_resource type="Resource" id="Resource_3p7sv"]
-script = ExtResource("7_agbcw")
-name = "animation_finish"
-
-[sub_resource type="Resource" id="Resource_kh2x6"]
-script = ExtResource("6_4e6oo")
-from = "Jump"
-to = "Falling"
-conditions = {
-"animation_finish": SubResource("Resource_3p7sv")
-}
-priority = 0
-
-[sub_resource type="Resource" id="Resource_kexvh"]
-script = ExtResource("7_fnitb")
-value = true
-comparation = 0
-name = "is_jumping"
-
-[sub_resource type="Resource" id="Resource_itwi7"]
-script = ExtResource("6_4e6oo")
-from = "Falling"
-to = "Hover"
-conditions = {
-"is_jumping": SubResource("Resource_kexvh")
-}
-priority = 0
-
-[sub_resource type="Resource" id="Resource_fmlsn"]
-script = ExtResource("7_fnitb")
-value = true
-comparation = 0
-name = "on_floor"
-
-[sub_resource type="Resource" id="Resource_sq0ja"]
-script = ExtResource("6_4e6oo")
-from = "Falling"
-to = "Walk"
-conditions = {
-"on_floor": SubResource("Resource_fmlsn")
-}
-priority = 0
-
-[sub_resource type="Resource" id="Resource_eiyla"]
-script = ExtResource("6_4e6oo")
-from = "Entry"
-to = "Falling"
-conditions = {}
 priority = 0
 
 [sub_resource type="Resource" id="Resource_oxabw"]

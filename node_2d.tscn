@@ -1,8 +1,13 @@
-[gd_scene load_steps=4 format=3 uid="uid://clw1fcci3j7ea"]
+[gd_scene load_steps=5 format=3 uid="uid://clw1fcci3j7ea"]
 
 [ext_resource type="Script" path="res://node_2d.gd" id="1_dy5n7"]
 [ext_resource type="PackedScene" uid="uid://b5h6i6q8wvrja" path="res://dragon-char.tscn" id="2_dweuj"]
-[ext_resource type="PackedScene" uid="uid://cglucrb04ft0q" path="res://floor.tscn" id="3_kasjd"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_dox05"]
+size = Vector2(1184, 672)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_55peu"]
+size = Vector2(1198, 86)
 
 [node name="MainScene" type="Node2D"]
 script = ExtResource("1_dy5n7")
@@ -10,5 +15,23 @@ script = ExtResource("1_dy5n7")
 [node name="CharacterBody2D" parent="." instance=ExtResource("2_dweuj")]
 position = Vector2(540, 304)
 
-[node name="floor" parent="." instance=ExtResource("3_kasjd")]
-position = Vector2(745, 324)
+[node name="Area2D" type="Area2D" parent="."]
+visible = false
+gravity_space_override = 1
+gravity = 900.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+position = Vector2(582, 326)
+shape = SubResource("RectangleShape2D_dox05")
+
+[node name="RigidBody2D" type="RigidBody2D" parent="."]
+position = Vector2(555, 648)
+freeze = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RigidBody2D"]
+position = Vector2(33, 6)
+shape = SubResource("RectangleShape2D_55peu")
+
+[node name="Polygon2D" type="Polygon2D" parent="RigidBody2D"]
+position = Vector2(-553, -612)
+polygon = PackedVector2Array(-3, 572, 1160, 575, 1154, 652, -2, 649)
