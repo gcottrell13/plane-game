@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3 uid="uid://clw1fcci3j7ea"]
+[gd_scene load_steps=6 format=3 uid="uid://clw1fcci3j7ea"]
 
 [ext_resource type="Script" path="res://node_2d.gd" id="1_dy5n7"]
 [ext_resource type="PackedScene" uid="uid://b5h6i6q8wvrja" path="res://dragon-char.tscn" id="2_dweuj"]
@@ -9,11 +9,14 @@ size = Vector2(1184, 672)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_55peu"]
 size = Vector2(1198, 86)
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_7g8ja"]
+size = Vector2(210, 64)
+
 [node name="MainScene" type="Node2D"]
 script = ExtResource("1_dy5n7")
 
 [node name="CharacterBody2D" parent="." instance=ExtResource("2_dweuj")]
-position = Vector2(540, 304)
+position = Vector2(31, 272)
 
 [node name="Area2D" type="Area2D" parent="."]
 visible = false
@@ -35,3 +38,10 @@ shape = SubResource("RectangleShape2D_55peu")
 [node name="Polygon2D" type="Polygon2D" parent="RigidBody2D"]
 position = Vector2(-553, -612)
 polygon = PackedVector2Array(-3, 572, 1160, 575, 1154, 652, -2, 649)
+
+[node name="CollisionShape2D2" type="CollisionShape2D" parent="RigidBody2D"]
+position = Vector2(-460, -275)
+shape = SubResource("RectangleShape2D_7g8ja")
+
+[node name="Polygon2D2" type="Polygon2D" parent="RigidBody2D"]
+polygon = PackedVector2Array(-566, -307, -356, -306, -353, -243, -566, -243)

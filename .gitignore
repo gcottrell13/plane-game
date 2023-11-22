@@ -17,3 +17,5 @@ export_presets.cfg
 .godot/editor/create_recent.Node
 
 .godot/editor/editor_layout.cfg
+
+.godot/editor/node_2d.*.cfg

@@ -8,12 +8,16 @@ const JUMP_VELOCITY = -600.0
 const DEFAULT_GRAVITY_DAMP = 1;
 var gravity_damp: float = DEFAULT_GRAVITY_DAMP;
 
+@export var INIT_GLIDE_SPEED: float = 500;
+
 var facing = 1;
 
 # Get the gravity from the project settings so you can sync with rigid body nodes.
 var dgravity = ProjectSettings.get_setting("physics/2d/default_gravity")
 
 var state: String = "";
+
+var gravity: Vector2 = Vector2.ZERO;
 
 @onready var _animation_player = $AnimationPlayer
 @onready var _smp = $StateMachinePlayer
@@ -22,24 +26,25 @@ var state: String = "";
 func _physics_process(delta):
 	var rid = get_rid()
 	var direct_state = PhysicsServer2D.body_get_direct_state(rid)
-	var g = direct_state.get_total_gravity()
+	gravity = direct_state.get_total_gravity()
+	var gnorm = gravity.normalized();
 	
 	if state == "Glide":
-		var vang = velocity.angle_to(g);
-		var new_angle = move_toward(vang, 0, delta);
+		var vang = velocity.angle_to(gravity);
+		var new_angle = sign(vang) * delta;
 		velocity = velocity.rotated(new_angle);
-		velocity *= clamp(velocity.dot(g), 0, 1) * 1.2;
-		velocity *= 0.95;
+		velocity += gnorm * clamp(velocity.dot(gravity), 0, 1) * 1.2;
+		velocity *= 0.99;
 		_sprite.rotation = velocity.angle()
 	else:
-		if g.y != dgravity:
-			velocity += g * delta * gravity_damp
-			up_direction = -g.normalized()
+		if gravity.y != dgravity:
+			velocity += gravity * delta * gravity_damp
+			up_direction = -gravity.normalized()
 			velocity *= 0.95
-			_sprite.rotation = g.angle() - PI / 2
+			_sprite.rotation = gravity.angle() - PI / 2
 			
 	if state == "Jump":
-		_smp.set_param("facing_down", velocity.dot(g) > 0)
+		_smp.set_param("facing_down", velocity.dot(gravity) > 0)
 	else:
 		_smp.set_param("facing_down", false)
 		
@@ -71,7 +76,8 @@ func on_transit_state(from, to):
 			_animation_player.play("hover")
 			gravity_damp = GRAVITY_FLYING_DAMP
 		"Glide":
-			_animation_player.play("glide")
+			_animation_player.play("glide");
+			velocity = gravity.normalized().rotated(-facing * PI / 2) * INIT_GLIDE_SPEED;
 		"Walk":
 			_animation_player.play("hover");
 			gravity_damp = GRAVITY_FLYING_DAMP
