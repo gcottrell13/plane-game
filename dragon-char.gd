@@ -9,8 +9,13 @@ const DEFAULT_GRAVITY_DAMP = 1;
 var gravity_damp: float = DEFAULT_GRAVITY_DAMP;
 
 @export var INIT_GLIDE_SPEED: float = 500;
+@export var PITCH_SPEED: float = 0.05;
+@export var GLIDE_FRICTION = 0.001;
+@export var GLIDE_GRAVITY_BOOST = 1.2;
 
-var facing = 1;
+const FACING_RIGHT = -1;
+const FACING_LEFT = 1;
+var facing = FACING_RIGHT;
 
 # Get the gravity from the project settings so you can sync with rigid body nodes.
 var dgravity = ProjectSettings.get_setting("physics/2d/default_gravity")
@@ -33,8 +38,8 @@ func _physics_process(delta):
 		var vang = velocity.angle_to(gravity);
 		var new_angle = sign(vang) * delta;
 		velocity = velocity.rotated(new_angle);
-		velocity += gnorm * clamp(velocity.dot(gravity), 0, 1) * 1.2;
-		velocity *= 0.99;
+		velocity += gnorm * clamp(velocity.dot(gravity), 0, 1) * GLIDE_GRAVITY_BOOST;
+		velocity *= 1 - GLIDE_FRICTION;
 		_sprite.rotation = velocity.angle()
 	else:
 		if gravity.y != dgravity:
@@ -65,7 +70,7 @@ func _on_jump():
 
 func _on_up():
 	if state == "Glide":
-		velocity = velocity.rotated(facing);
+		velocity = velocity.rotated(facing * PITCH_SPEED);
 	
 
 func on_transit_state(from, to):
@@ -77,7 +82,7 @@ func on_transit_state(from, to):
 			gravity_damp = GRAVITY_FLYING_DAMP
 		"Glide":
 			_animation_player.play("glide");
-			velocity = gravity.normalized().rotated(-facing * PI / 2) * INIT_GLIDE_SPEED;
+			velocity = gravity.normalized().rotated(facing * PI / 2) * INIT_GLIDE_SPEED;
 		"Walk":
 			_animation_player.play("hover");
 			gravity_damp = GRAVITY_FLYING_DAMP
