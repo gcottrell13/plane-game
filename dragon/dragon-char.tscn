@@ -1,0 +1,521 @@
+[gd_scene load_steps=69 format=3 uid="uid://b5h6i6q8wvrja"]
+
+[ext_resource type="Script" path="res://dragon/dragon-char.gd" id="1_032u5"]
+[ext_resource type="Texture2D" uid="uid://byr1eplit6cwv" path="res://dragon/indexed-dragon_black.png" id="2_7hk8l"]
+[ext_resource type="Shader" path="res://dragon/dragon-char.gdshader" id="2_e4xfh"]
+[ext_resource type="Script" path="res://addons/imjp94.yafsm/src/StateMachinePlayer.gd" id="3_levpd"]
+[ext_resource type="Texture2D" uid="uid://wl6halbtsh6i" path="res://dragon/palette-dragon_black.png" id="3_q4qa1"]
+[ext_resource type="Script" path="res://addons/imjp94.yafsm/src/states/StateMachine.gd" id="4_4c4ap"]
+[ext_resource type="Script" path="res://addons/imjp94.yafsm/src/states/State.gd" id="5_kqujb"]
+[ext_resource type="Script" path="res://addons/imjp94.yafsm/src/conditions/Condition.gd" id="6_tmfcb"]
+[ext_resource type="Script" path="res://addons/imjp94.yafsm/src/transitions/Transition.gd" id="7_7ikg8"]
+[ext_resource type="Script" path="res://addons/imjp94.yafsm/src/conditions/BooleanCondition.gd" id="8_v7t80"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_1uprt"]
+shader = ExtResource("2_e4xfh")
+shader_parameter/palette = ExtResource("3_q4qa1")
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_8udjb"]
+size = Vector2(64, 64)
+
+[sub_resource type="Animation" id="Animation_bdxdn"]
+resource_name = "glide"
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [13]
+}
+
+[sub_resource type="Animation" id="Animation_m8tr1"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [13]
+}
+
+[sub_resource type="Animation" id="Animation_isf7x"]
+resource_name = "fly"
+length = 0.8
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [13, 14, 15, 16, 17, 18, 11, 12]
+}
+
+[sub_resource type="Animation" id="Animation_tmr1p"]
+resource_name = "hover"
+length = 0.8
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [0, 1, 2, 3, 4, 5, 6, 7]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_72566"]
+_data = {
+"RESET": SubResource("Animation_m8tr1"),
+"fly": SubResource("Animation_isf7x"),
+"glide": SubResource("Animation_bdxdn"),
+"hover": SubResource("Animation_tmr1p")
+}
+
+[sub_resource type="Resource" id="Resource_20h0f"]
+script = ExtResource("5_kqujb")
+name = "Cling"
+metadata/graph_offset = Vector2(246, 202)
+
+[sub_resource type="Resource" id="Resource_lsjyr"]
+script = ExtResource("5_kqujb")
+name = "Entry"
+metadata/graph_offset = Vector2(646, 462)
+
+[sub_resource type="Resource" id="Resource_fflak"]
+script = ExtResource("5_kqujb")
+name = "Falling"
+metadata/graph_offset = Vector2(746, 462)
+
+[sub_resource type="Resource" id="Resource_ma1t7"]
+script = ExtResource("5_kqujb")
+name = "Glide"
+metadata/graph_offset = Vector2(1606, 342)
+
+[sub_resource type="Resource" id="Resource_d5gry"]
+script = ExtResource("5_kqujb")
+name = "Hover"
+metadata/graph_offset = Vector2(1346, 462)
+
+[sub_resource type="Resource" id="Resource_3k4q8"]
+script = ExtResource("5_kqujb")
+name = "Idle"
+metadata/graph_offset = Vector2(846, 702)
+
+[sub_resource type="Resource" id="Resource_pnws4"]
+script = ExtResource("5_kqujb")
+name = "Jump"
+metadata/graph_offset = Vector2(246, 902)
+
+[sub_resource type="Resource" id="Resource_ilf3a"]
+script = ExtResource("5_kqujb")
+name = "Walk"
+metadata/graph_offset = Vector2(1726, 922)
+
+[sub_resource type="Resource" id="Resource_3fbrx"]
+script = ExtResource("5_kqujb")
+name = "Flight"
+metadata/graph_offset = Vector2(2186, 202)
+
+[sub_resource type="Resource" id="Resource_rjnfg"]
+script = ExtResource("8_v7t80")
+value = true
+comparation = 0
+name = "holding_jump"
+
+[sub_resource type="Resource" id="Resource_853qw"]
+script = ExtResource("7_7ikg8")
+from = "Cling"
+to = "Jump"
+conditions = {
+"holding_jump": SubResource("Resource_rjnfg")
+}
+priority = 0
+
+[sub_resource type="Resource" id="Resource_eiyla"]
+script = ExtResource("7_7ikg8")
+from = "Entry"
+to = "Falling"
+conditions = {}
+priority = 0
+
+[sub_resource type="Resource" id="Resource_jc1yg"]
+script = ExtResource("6_tmfcb")
+name = "fall_to_hover"
+
+[sub_resource type="Resource" id="Resource_itwi7"]
+script = ExtResource("7_7ikg8")
+from = "Falling"
+to = "Hover"
+conditions = {
+"fall_to_hover": SubResource("Resource_jc1yg")
+}
+priority = 0
+
+[sub_resource type="Resource" id="Resource_fmlsn"]
+script = ExtResource("8_v7t80")
+value = true
+comparation = 0
+name = "on_floor"
+
+[sub_resource type="Resource" id="Resource_sq0ja"]
+script = ExtResource("7_7ikg8")
+from = "Falling"
+to = "Walk"
+conditions = {
+"on_floor": SubResource("Resource_fmlsn")
+}
+priority = 0
+
+[sub_resource type="Resource" id="Resource_ah68s"]
+script = ExtResource("8_v7t80")
+value = true
+comparation = 0
+name = "on_wall"
+
+[sub_resource type="Resource" id="Resource_boyam"]
+script = ExtResource("7_7ikg8")
+from = "Glide"
+to = "Cling"
+conditions = {
+"on_wall": SubResource("Resource_ah68s")
+}
+priority = 0
+
+[sub_resource type="Resource" id="Resource_jbs7c"]
+script = ExtResource("8_v7t80")
+value = true
+comparation = 0
+name = "on_floor"
+
+[sub_resource type="Resource" id="Resource_dw4iu"]
+script = ExtResource("7_7ikg8")
+from = "Glide"
+to = "Walk"
+conditions = {
+"on_floor": SubResource("Resource_jbs7c")
+}
+priority = 0
+
+[sub_resource type="Resource" id="Resource_hki3y"]
+script = ExtResource("8_v7t80")
+value = true
+comparation = 0
+name = "pitching"
+
+[sub_resource type="Resource" id="Resource_shllo"]
+script = ExtResource("7_7ikg8")
+from = "Glide"
+to = "Flight"
+conditions = {
+"pitching": SubResource("Resource_hki3y")
+}
+priority = 0
+
+[sub_resource type="Resource" id="Resource_vdbhe"]
+script = ExtResource("8_v7t80")
+value = true
+comparation = 0
+name = "on_wall"
+
+[sub_resource type="Resource" id="Resource_2mahv"]
+script = ExtResource("7_7ikg8")
+from = "Hover"
+to = "Cling"
+conditions = {
+"on_wall": SubResource("Resource_vdbhe")
+}
+priority = 0
+
+[sub_resource type="Resource" id="Resource_scfei"]
+script = ExtResource("6_tmfcb")
+name = "sideways"
+
+[sub_resource type="Resource" id="Resource_bh2iq"]
+script = ExtResource("7_7ikg8")
+from = "Hover"
+to = "Glide"
+conditions = {
+"sideways": SubResource("Resource_scfei")
+}
+priority = 0
+
+[sub_resource type="Resource" id="Resource_wxgau"]
+script = ExtResource("8_v7t80")
+value = true
+comparation = 0
+name = "on_floor"
+
+[sub_resource type="Resource" id="Resource_kd8oy"]
+script = ExtResource("7_7ikg8")
+from = "Hover"
+to = "Walk"
+conditions = {
+"on_floor": SubResource("Resource_wxgau")
+}
+priority = 0
+
+[sub_resource type="Resource" id="Resource_hfc8k"]
+script = ExtResource("6_tmfcb")
+name = "glide"
+
+[sub_resource type="Resource" id="Resource_3ouqf"]
+script = ExtResource("7_7ikg8")
+from = "Hover"
+to = "Falling"
+conditions = {
+"glide": SubResource("Resource_hfc8k")
+}
+priority = 0
+
+[sub_resource type="Resource" id="Resource_124o0"]
+script = ExtResource("8_v7t80")
+value = true
+comparation = 0
+name = "facing_down"
+
+[sub_resource type="Resource" id="Resource_h8bmj"]
+script = ExtResource("7_7ikg8")
+from = "Idle"
+to = "Falling"
+conditions = {
+"facing_down": SubResource("Resource_124o0")
+}
+priority = 0
+
+[sub_resource type="Resource" id="Resource_ixuic"]
+script = ExtResource("8_v7t80")
+value = true
+comparation = 0
+name = "holding_jump"
+
+[sub_resource type="Resource" id="Resource_2062t"]
+script = ExtResource("7_7ikg8")
+from = "Idle"
+to = "Jump"
+conditions = {
+"holding_jump": SubResource("Resource_ixuic")
+}
+priority = 0
+
+[sub_resource type="Resource" id="Resource_wlty0"]
+script = ExtResource("8_v7t80")
+value = true
+comparation = 0
+name = "moving"
+
+[sub_resource type="Resource" id="Resource_pieub"]
+script = ExtResource("7_7ikg8")
+from = "Idle"
+to = "Walk"
+conditions = {
+"moving": SubResource("Resource_wlty0")
+}
+priority = 0
+
+[sub_resource type="Resource" id="Resource_4suhf"]
+script = ExtResource("8_v7t80")
+value = true
+comparation = 0
+name = "facing_down"
+
+[sub_resource type="Resource" id="Resource_kh2x6"]
+script = ExtResource("7_7ikg8")
+from = "Jump"
+to = "Falling"
+conditions = {
+"facing_down": SubResource("Resource_4suhf")
+}
+priority = 0
+
+[sub_resource type="Resource" id="Resource_wnauu"]
+script = ExtResource("8_v7t80")
+value = true
+comparation = 0
+name = "facing_down"
+
+[sub_resource type="Resource" id="Resource_ltdfr"]
+script = ExtResource("7_7ikg8")
+from = "Walk"
+to = "Falling"
+conditions = {
+"facing_down": SubResource("Resource_wnauu")
+}
+priority = 0
+
+[sub_resource type="Resource" id="Resource_sc2vx"]
+script = ExtResource("8_v7t80")
+value = false
+comparation = 0
+name = "moving"
+
+[sub_resource type="Resource" id="Resource_3id6n"]
+script = ExtResource("7_7ikg8")
+from = "Walk"
+to = "Idle"
+conditions = {
+"moving": SubResource("Resource_sc2vx")
+}
+priority = 0
+
+[sub_resource type="Resource" id="Resource_ucgla"]
+script = ExtResource("8_v7t80")
+value = true
+comparation = 0
+name = "holding_jump"
+
+[sub_resource type="Resource" id="Resource_c1ytx"]
+script = ExtResource("7_7ikg8")
+from = "Walk"
+to = "Jump"
+conditions = {
+"holding_jump": SubResource("Resource_ucgla")
+}
+priority = 0
+
+[sub_resource type="Resource" id="Resource_h7aj0"]
+script = ExtResource("8_v7t80")
+value = false
+comparation = 0
+name = "pitching"
+
+[sub_resource type="Resource" id="Resource_t2wgy"]
+script = ExtResource("7_7ikg8")
+from = "Flight"
+to = "Glide"
+conditions = {
+"pitching": SubResource("Resource_h7aj0")
+}
+priority = 0
+
+[sub_resource type="Resource" id="Resource_kdf7g"]
+script = ExtResource("8_v7t80")
+value = true
+comparation = 0
+name = "on_floor"
+
+[sub_resource type="Resource" id="Resource_ypjhi"]
+script = ExtResource("7_7ikg8")
+from = "Flight"
+to = "Walk"
+conditions = {
+"on_floor": SubResource("Resource_kdf7g")
+}
+priority = 0
+
+[sub_resource type="Resource" id="Resource_uxi1q"]
+script = ExtResource("8_v7t80")
+value = true
+comparation = 0
+name = "on_wall"
+
+[sub_resource type="Resource" id="Resource_vwleu"]
+script = ExtResource("7_7ikg8")
+from = "Flight"
+to = "Cling"
+conditions = {
+"on_wall": SubResource("Resource_uxi1q")
+}
+priority = 0
+
+[sub_resource type="Resource" id="Resource_oxabw"]
+script = ExtResource("4_4c4ap")
+states = {
+"Cling": SubResource("Resource_20h0f"),
+"Entry": SubResource("Resource_lsjyr"),
+"Falling": SubResource("Resource_fflak"),
+"Flight": SubResource("Resource_3fbrx"),
+"Glide": SubResource("Resource_ma1t7"),
+"Hover": SubResource("Resource_d5gry"),
+"Idle": SubResource("Resource_3k4q8"),
+"Jump": SubResource("Resource_pnws4"),
+"Walk": SubResource("Resource_ilf3a")
+}
+transitions = {
+"Cling": {
+"Jump": SubResource("Resource_853qw")
+},
+"Entry": {
+"Falling": SubResource("Resource_eiyla")
+},
+"Falling": {
+"Hover": SubResource("Resource_itwi7"),
+"Walk": SubResource("Resource_sq0ja")
+},
+"Flight": {
+"Cling": SubResource("Resource_vwleu"),
+"Glide": SubResource("Resource_t2wgy"),
+"Walk": SubResource("Resource_ypjhi")
+},
+"Glide": {
+"Cling": SubResource("Resource_boyam"),
+"Flight": SubResource("Resource_shllo"),
+"Walk": SubResource("Resource_dw4iu")
+},
+"Hover": {
+"Cling": SubResource("Resource_2mahv"),
+"Falling": SubResource("Resource_3ouqf"),
+"Glide": SubResource("Resource_bh2iq"),
+"Walk": SubResource("Resource_kd8oy")
+},
+"Idle": {
+"Falling": SubResource("Resource_h8bmj"),
+"Jump": SubResource("Resource_2062t"),
+"Walk": SubResource("Resource_pieub")
+},
+"Jump": {
+"Falling": SubResource("Resource_kh2x6")
+},
+"Walk": {
+"Falling": SubResource("Resource_ltdfr"),
+"Idle": SubResource("Resource_3id6n"),
+"Jump": SubResource("Resource_c1ytx")
+}
+}
+name = ""
+
+[node name="CharacterBody2D" type="CharacterBody2D"]
+script = ExtResource("1_032u5")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture_filter = 1
+material = SubResource("ShaderMaterial_1uprt")
+texture = ExtResource("2_7hk8l")
+hframes = 11
+vframes = 7
+frame = 13
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+visible = false
+shape = SubResource("RectangleShape2D_8udjb")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+root_node = NodePath("../Sprite2D")
+libraries = {
+"": SubResource("AnimationLibrary_72566")
+}
+
+[node name="StateMachinePlayer" type="Node" parent="."]
+script = ExtResource("3_levpd")
+state_machine = SubResource("Resource_oxabw")
+
+[connection signal="transited" from="StateMachinePlayer" to="." method="on_transit_state"]
+[connection signal="updated" from="StateMachinePlayer" to="." method="_on_smp_updated"]

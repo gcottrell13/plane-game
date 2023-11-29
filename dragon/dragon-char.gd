@@ -1,8 +1,8 @@
 extends CharacterBody2D
 
 
-const SPEED = 300.0
-const JUMP_VELOCITY = -600.0
+@export var SPEED = 300.0
+@export var JUMP_VELOCITY = -600.0
 
 @export var GRAVITY_FLYING_DAMP: float = 0.1;
 const DEFAULT_GRAVITY_DAMP = 1;
@@ -34,13 +34,15 @@ func _physics_process(delta):
 	gravity = direct_state.get_total_gravity()
 	var gnorm = gravity.normalized();
 	
-	if state == "Glide":
+	if state == "Glide" or state == "Flight":
 		var vang = velocity.angle_to(gravity);
 		var new_angle = sign(vang) * delta;
 		velocity = velocity.rotated(new_angle);
 		velocity += gnorm * clamp(velocity.dot(gravity), 0, 1) * GLIDE_GRAVITY_BOOST;
 		velocity *= 1 - GLIDE_FRICTION;
 		_sprite.rotation = velocity.angle()
+		if facing == FACING_LEFT:
+			_sprite.rotation += PI;
 	else:
 		if gravity.y != dgravity:
 			velocity += gravity * delta * gravity_damp
@@ -55,8 +57,9 @@ func _physics_process(delta):
 		
 		
 	move_and_slide()
+	_smp.set_param("moving", velocity.length_squared() < 0.01);
 	_smp.set_param("on_floor", is_on_floor())
-	_smp.set_param("is_jumping", Input.is_action_pressed("jump"));
+	_smp.set_param("holding_jump", Input.is_action_pressed("jump"));
 
 
 func _input(event):
@@ -65,12 +68,18 @@ func _input(event):
 
 
 func _on_jump():
-	_smp.set_trigger("jump")
-	_smp.set_trigger("glide")
-
-func _on_up():
-	if state == "Glide":
-		velocity = velocity.rotated(facing * PITCH_SPEED);
+	if state == "Hover":
+		if Input.is_action_pressed("left") or Input.is_action_pressed("right"):
+			if Input.is_action_pressed("left"):
+				facing = FACING_LEFT
+			else:
+				facing = FACING_RIGHT
+			_smp.set_trigger("sideways")
+		else:
+			_smp.set_trigger("glide")
+	else:
+		_smp.set_trigger("fall_to_hover")
+		_smp.set_trigger("jump")
 	
 
 func on_transit_state(from, to):
@@ -82,14 +91,24 @@ func on_transit_state(from, to):
 			gravity_damp = GRAVITY_FLYING_DAMP
 		"Glide":
 			_animation_player.play("glide");
-			velocity = gravity.normalized().rotated(facing * PI / 2) * INIT_GLIDE_SPEED;
+			if from == "Hover":
+				velocity = gravity.normalized().rotated(facing * PI / 2) * INIT_GLIDE_SPEED;
+		"Flight":
+			_animation_player.play("fly");
 		"Walk":
 			_animation_player.play("hover");
 			gravity_damp = GRAVITY_FLYING_DAMP
 		"Jump":
 			velocity.y = JUMP_VELOCITY;
+		"Falling":
+			if from == "Jump" and Input.is_action_pressed("jump"):
+				_smp.set_trigger("fall_to_hover");
+			else:
+				_animation_player.play("glide");
+				gravity_damp = DEFAULT_GRAVITY_DAMP;
 
 func _on_smp_updated(state, delta):
+	_sprite.flip_h = (facing == FACING_LEFT);
 	match state:
 		"Cling":
 			pass
@@ -97,7 +116,19 @@ func _on_smp_updated(state, delta):
 			pass
 		"Glide":
 			if Input.is_action_pressed("up"):
-				_on_up();
+				_smp.set_param("pitching", true);
+			elif Input.is_action_pressed("down"):
+				_smp.set_param("pitching", true);
 		"Hover":
-			if Input.is_action_pressed("jump"):
-				_smp.set_trigger("glide")
+			#if Input.is_action_pressed("jump"):
+				#_smp.set_trigger("glide")
+			pass
+		"Flight":
+			if Input.is_action_pressed("up"):
+				velocity = velocity.rotated(facing * PITCH_SPEED);
+				_smp.set_param("pitching", true);
+			elif Input.is_action_pressed("down"):
+				velocity = velocity.rotated(-facing * PITCH_SPEED);
+				_smp.set_param("pitching", true);
+			else:
+				_smp.set_param("pitching", false);
