@@ -2,7 +2,7 @@ extends CharacterBody2D
 
 
 @export var SPEED = 300.0
-@export var JUMP_VELOCITY = -600.0
+@export var JUMP_VELOCITY = 600.0
 
 @export var GRAVITY_FLYING_DAMP: float = 0.1;
 const DEFAULT_GRAVITY_DAMP = 1;
@@ -33,6 +33,7 @@ func _physics_process(delta):
 	var direct_state = PhysicsServer2D.body_get_direct_state(rid)
 	gravity = direct_state.get_total_gravity()
 	var gnorm = gravity.normalized();
+	up_direction = -gnorm;
 	
 	if state == "Glide" or state == "Flight":
 		var vang = velocity.angle_to(gravity);
@@ -46,7 +47,6 @@ func _physics_process(delta):
 	else:
 		if gravity.y != dgravity:
 			velocity += gravity * delta * gravity_damp
-			up_direction = -gravity.normalized()
 			velocity *= 0.95
 			_sprite.rotation = gravity.angle() - PI / 2
 			
@@ -57,7 +57,7 @@ func _physics_process(delta):
 		
 		
 	move_and_slide()
-	_smp.set_param("moving", velocity.length_squared() < 0.01);
+	_smp.set_param("moving", velocity.length_squared() > 0.01);
 	_smp.set_param("on_floor", is_on_floor())
 	_smp.set_param("holding_jump", Input.is_action_pressed("jump"));
 
@@ -95,17 +95,18 @@ func on_transit_state(from, to):
 				velocity = gravity.normalized().rotated(facing * PI / 2) * INIT_GLIDE_SPEED;
 		"Flight":
 			_animation_player.play("fly");
+			gravity_damp = GRAVITY_FLYING_DAMP
 		"Walk":
 			_animation_player.play("hover");
-			gravity_damp = GRAVITY_FLYING_DAMP
+		"Idle":
+			_animation_player.play('idle');
 		"Jump":
-			velocity.y = JUMP_VELOCITY;
+			velocity = up_direction * JUMP_VELOCITY;
 		"Falling":
 			if from == "Jump" and Input.is_action_pressed("jump"):
 				_smp.set_trigger("fall_to_hover");
 			else:
-				_animation_player.play("glide");
-				gravity_damp = DEFAULT_GRAVITY_DAMP;
+				_animation_player.play("falling");
 
 func _on_smp_updated(state, delta):
 	_sprite.flip_h = (facing == FACING_LEFT);

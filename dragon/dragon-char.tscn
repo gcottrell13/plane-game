@@ -1,4 +1,4 @@
-[gd_scene load_steps=69 format=3 uid="uid://b5h6i6q8wvrja"]
+[gd_scene load_steps=71 format=3 uid="uid://b5h6i6q8wvrja"]
 
 [ext_resource type="Script" path="res://dragon/dragon-char.gd" id="1_032u5"]
 [ext_resource type="Texture2D" uid="uid://byr1eplit6cwv" path="res://dragon/indexed-dragon_black.png" id="2_7hk8l"]
@@ -82,12 +82,48 @@ tracks/0/keys = {
 "values": [0, 1, 2, 3, 4, 5, 6, 7]
 }
 
+[sub_resource type="Animation" id="Animation_v0k0x"]
+resource_name = "idle"
+length = 2.0
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [37, 38]
+}
+
+[sub_resource type="Animation" id="Animation_gtb03"]
+resource_name = "falling"
+length = 0.4
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.3),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 1,
+"values": [28, 29, 30, 31]
+}
+
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_72566"]
 _data = {
 "RESET": SubResource("Animation_m8tr1"),
+"falling": SubResource("Animation_gtb03"),
 "fly": SubResource("Animation_isf7x"),
 "glide": SubResource("Animation_bdxdn"),
-"hover": SubResource("Animation_tmr1p")
+"hover": SubResource("Animation_tmr1p"),
+"idle": SubResource("Animation_v0k0x")
 }
 
 [sub_resource type="Resource" id="Resource_20h0f"]
@@ -288,16 +324,16 @@ priority = 0
 
 [sub_resource type="Resource" id="Resource_124o0"]
 script = ExtResource("8_v7t80")
-value = true
+value = false
 comparation = 0
-name = "facing_down"
+name = "on_floor"
 
 [sub_resource type="Resource" id="Resource_h8bmj"]
 script = ExtResource("7_7ikg8")
 from = "Idle"
 to = "Falling"
 conditions = {
-"facing_down": SubResource("Resource_124o0")
+"on_floor": SubResource("Resource_124o0")
 }
 priority = 0
 
@@ -495,6 +531,10 @@ name = ""
 [node name="CharacterBody2D" type="CharacterBody2D"]
 script = ExtResource("1_032u5")
 
+[node name="Polygon2D" type="Polygon2D" parent="."]
+visible = false
+polygon = PackedVector2Array(-32, -32, -32, 32, 32, 32, 32, -32)
+
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture_filter = 1
 material = SubResource("ShaderMaterial_1uprt")
@@ -504,7 +544,6 @@ vframes = 7
 frame = 13
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-visible = false
 shape = SubResource("RectangleShape2D_8udjb")
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
