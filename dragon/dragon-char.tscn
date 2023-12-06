@@ -1,4 +1,4 @@
-[gd_scene load_steps=71 format=3 uid="uid://b5h6i6q8wvrja"]
+[gd_scene load_steps=73 format=3 uid="uid://b5h6i6q8wvrja"]
 
 [ext_resource type="Script" path="res://dragon/dragon-char.gd" id="1_032u5"]
 [ext_resource type="Texture2D" uid="uid://byr1eplit6cwv" path="res://dragon/indexed-dragon_black.png" id="2_7hk8l"]
@@ -18,21 +18,6 @@ shader_parameter/palette = ExtResource("3_q4qa1")
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_8udjb"]
 size = Vector2(64, 64)
 
-[sub_resource type="Animation" id="Animation_bdxdn"]
-resource_name = "glide"
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath(".:frame")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 1,
-"values": [13]
-}
-
 [sub_resource type="Animation" id="Animation_m8tr1"]
 length = 0.001
 tracks/0/type = "value"
@@ -46,6 +31,23 @@ tracks/0/keys = {
 "transitions": PackedFloat32Array(1),
 "update": 1,
 "values": [13]
+}
+
+[sub_resource type="Animation" id="Animation_gtb03"]
+resource_name = "falling"
+length = 0.4
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.3),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 1,
+"values": [28, 29, 30, 31]
 }
 
 [sub_resource type="Animation" id="Animation_isf7x"]
@@ -63,6 +65,21 @@ tracks/0/keys = {
 "transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1),
 "update": 1,
 "values": [13, 14, 15, 16, 17, 18, 11, 12]
+}
+
+[sub_resource type="Animation" id="Animation_bdxdn"]
+resource_name = "glide"
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [13]
 }
 
 [sub_resource type="Animation" id="Animation_tmr1p"]
@@ -99,23 +116,6 @@ tracks/0/keys = {
 "values": [37, 38]
 }
 
-[sub_resource type="Animation" id="Animation_gtb03"]
-resource_name = "falling"
-length = 0.4
-loop_mode = 1
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath(".:frame")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.1, 0.2, 0.3),
-"transitions": PackedFloat32Array(1, 1, 1, 1),
-"update": 1,
-"values": [28, 29, 30, 31]
-}
-
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_72566"]
 _data = {
 "RESET": SubResource("Animation_m8tr1"),
@@ -140,6 +140,11 @@ metadata/graph_offset = Vector2(646, 462)
 script = ExtResource("5_kqujb")
 name = "Falling"
 metadata/graph_offset = Vector2(746, 462)
+
+[sub_resource type="Resource" id="Resource_3fbrx"]
+script = ExtResource("5_kqujb")
+name = "Flight"
+metadata/graph_offset = Vector2(2186, 202)
 
 [sub_resource type="Resource" id="Resource_ma1t7"]
 script = ExtResource("5_kqujb")
@@ -166,11 +171,6 @@ script = ExtResource("5_kqujb")
 name = "Walk"
 metadata/graph_offset = Vector2(1726, 922)
 
-[sub_resource type="Resource" id="Resource_3fbrx"]
-script = ExtResource("5_kqujb")
-name = "Flight"
-metadata/graph_offset = Vector2(2186, 202)
-
 [sub_resource type="Resource" id="Resource_rjnfg"]
 script = ExtResource("8_v7t80")
 value = true
@@ -191,6 +191,19 @@ script = ExtResource("7_7ikg8")
 from = "Entry"
 to = "Falling"
 conditions = {}
+priority = 0
+
+[sub_resource type="Resource" id="Resource_as2xe"]
+script = ExtResource("6_tmfcb")
+name = "sideways"
+
+[sub_resource type="Resource" id="Resource_7eohn"]
+script = ExtResource("7_7ikg8")
+from = "Falling"
+to = "Glide"
+conditions = {
+"sideways": SubResource("Resource_as2xe")
+}
 priority = 0
 
 [sub_resource type="Resource" id="Resource_jc1yg"]
@@ -221,6 +234,51 @@ conditions = {
 }
 priority = 0
 
+[sub_resource type="Resource" id="Resource_uxi1q"]
+script = ExtResource("8_v7t80")
+value = true
+comparation = 0
+name = "on_wall"
+
+[sub_resource type="Resource" id="Resource_vwleu"]
+script = ExtResource("7_7ikg8")
+from = "Flight"
+to = "Cling"
+conditions = {
+"on_wall": SubResource("Resource_uxi1q")
+}
+priority = 0
+
+[sub_resource type="Resource" id="Resource_h7aj0"]
+script = ExtResource("8_v7t80")
+value = false
+comparation = 0
+name = "pitching"
+
+[sub_resource type="Resource" id="Resource_t2wgy"]
+script = ExtResource("7_7ikg8")
+from = "Flight"
+to = "Glide"
+conditions = {
+"pitching": SubResource("Resource_h7aj0")
+}
+priority = 0
+
+[sub_resource type="Resource" id="Resource_kdf7g"]
+script = ExtResource("8_v7t80")
+value = true
+comparation = 0
+name = "on_floor"
+
+[sub_resource type="Resource" id="Resource_ypjhi"]
+script = ExtResource("7_7ikg8")
+from = "Flight"
+to = "Walk"
+conditions = {
+"on_floor": SubResource("Resource_kdf7g")
+}
+priority = 0
+
 [sub_resource type="Resource" id="Resource_ah68s"]
 script = ExtResource("8_v7t80")
 value = true
@@ -233,21 +291,6 @@ from = "Glide"
 to = "Cling"
 conditions = {
 "on_wall": SubResource("Resource_ah68s")
-}
-priority = 0
-
-[sub_resource type="Resource" id="Resource_jbs7c"]
-script = ExtResource("8_v7t80")
-value = true
-comparation = 0
-name = "on_floor"
-
-[sub_resource type="Resource" id="Resource_dw4iu"]
-script = ExtResource("7_7ikg8")
-from = "Glide"
-to = "Walk"
-conditions = {
-"on_floor": SubResource("Resource_jbs7c")
 }
 priority = 0
 
@@ -266,6 +309,21 @@ conditions = {
 }
 priority = 0
 
+[sub_resource type="Resource" id="Resource_jbs7c"]
+script = ExtResource("8_v7t80")
+value = true
+comparation = 0
+name = "on_floor"
+
+[sub_resource type="Resource" id="Resource_dw4iu"]
+script = ExtResource("7_7ikg8")
+from = "Glide"
+to = "Walk"
+conditions = {
+"on_floor": SubResource("Resource_jbs7c")
+}
+priority = 0
+
 [sub_resource type="Resource" id="Resource_vdbhe"]
 script = ExtResource("8_v7t80")
 value = true
@@ -278,6 +336,19 @@ from = "Hover"
 to = "Cling"
 conditions = {
 "on_wall": SubResource("Resource_vdbhe")
+}
+priority = 0
+
+[sub_resource type="Resource" id="Resource_hfc8k"]
+script = ExtResource("6_tmfcb")
+name = "glide"
+
+[sub_resource type="Resource" id="Resource_3ouqf"]
+script = ExtResource("7_7ikg8")
+from = "Hover"
+to = "Falling"
+conditions = {
+"glide": SubResource("Resource_hfc8k")
 }
 priority = 0
 
@@ -306,19 +377,6 @@ from = "Hover"
 to = "Walk"
 conditions = {
 "on_floor": SubResource("Resource_wxgau")
-}
-priority = 0
-
-[sub_resource type="Resource" id="Resource_hfc8k"]
-script = ExtResource("6_tmfcb")
-name = "glide"
-
-[sub_resource type="Resource" id="Resource_3ouqf"]
-script = ExtResource("7_7ikg8")
-from = "Hover"
-to = "Falling"
-conditions = {
-"glide": SubResource("Resource_hfc8k")
 }
 priority = 0
 
@@ -384,16 +442,16 @@ priority = 0
 
 [sub_resource type="Resource" id="Resource_wnauu"]
 script = ExtResource("8_v7t80")
-value = true
+value = false
 comparation = 0
-name = "facing_down"
+name = "on_floor"
 
 [sub_resource type="Resource" id="Resource_ltdfr"]
 script = ExtResource("7_7ikg8")
 from = "Walk"
 to = "Falling"
 conditions = {
-"facing_down": SubResource("Resource_wnauu")
+"on_floor": SubResource("Resource_wnauu")
 }
 priority = 0
 
@@ -427,51 +485,6 @@ conditions = {
 }
 priority = 0
 
-[sub_resource type="Resource" id="Resource_h7aj0"]
-script = ExtResource("8_v7t80")
-value = false
-comparation = 0
-name = "pitching"
-
-[sub_resource type="Resource" id="Resource_t2wgy"]
-script = ExtResource("7_7ikg8")
-from = "Flight"
-to = "Glide"
-conditions = {
-"pitching": SubResource("Resource_h7aj0")
-}
-priority = 0
-
-[sub_resource type="Resource" id="Resource_kdf7g"]
-script = ExtResource("8_v7t80")
-value = true
-comparation = 0
-name = "on_floor"
-
-[sub_resource type="Resource" id="Resource_ypjhi"]
-script = ExtResource("7_7ikg8")
-from = "Flight"
-to = "Walk"
-conditions = {
-"on_floor": SubResource("Resource_kdf7g")
-}
-priority = 0
-
-[sub_resource type="Resource" id="Resource_uxi1q"]
-script = ExtResource("8_v7t80")
-value = true
-comparation = 0
-name = "on_wall"
-
-[sub_resource type="Resource" id="Resource_vwleu"]
-script = ExtResource("7_7ikg8")
-from = "Flight"
-to = "Cling"
-conditions = {
-"on_wall": SubResource("Resource_uxi1q")
-}
-priority = 0
-
 [sub_resource type="Resource" id="Resource_oxabw"]
 script = ExtResource("4_4c4ap")
 states = {
@@ -493,6 +506,7 @@ transitions = {
 "Falling": SubResource("Resource_eiyla")
 },
 "Falling": {
+"Glide": SubResource("Resource_7eohn"),
 "Hover": SubResource("Resource_itwi7"),
 "Walk": SubResource("Resource_sq0ja")
 },

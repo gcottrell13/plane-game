@@ -13,6 +13,9 @@ var gravity_damp: float = DEFAULT_GRAVITY_DAMP;
 @export var GLIDE_FRICTION = 0.001;
 @export var GLIDE_GRAVITY_BOOST = 1.2;
 
+@export var WALK_ACCEL = 10;
+@export var WALK_MAX = 150;
+
 const FACING_RIGHT = -1;
 const FACING_LEFT = 1;
 var facing = FACING_RIGHT;
@@ -23,6 +26,8 @@ var dgravity = ProjectSettings.get_setting("physics/2d/default_gravity")
 var state: String = "";
 
 var gravity: Vector2 = Vector2.ZERO;
+var leftDir: Vector2 = Vector2.ZERO;
+var rightDir: Vector2 = Vector2.ZERO;
 
 @onready var _animation_player = $AnimationPlayer
 @onready var _smp = $StateMachinePlayer
@@ -34,6 +39,8 @@ func _physics_process(delta):
 	gravity = direct_state.get_total_gravity()
 	var gnorm = gravity.normalized();
 	up_direction = -gnorm;
+	leftDir = up_direction.rotated(-PI / 2)
+	rightDir = up_direction.rotated(PI / 2)
 	
 	if state == "Glide" or state == "Flight":
 		var vang = velocity.angle_to(gravity);
@@ -44,6 +51,25 @@ func _physics_process(delta):
 		_sprite.rotation = velocity.angle()
 		if facing == FACING_LEFT:
 			_sprite.rotation += PI;
+	elif state == "Walk" or state == "Idle":
+		if Input.is_action_pressed("left"):
+			velocity += leftDir * WALK_ACCEL
+		elif Input.is_action_pressed("right"):
+			velocity += rightDir * WALK_ACCEL
+		elif velocity.length() > WALK_ACCEL:
+			# slow down
+			velocity -= velocity.normalized() * WALK_ACCEL
+		else:
+			velocity = Vector2.ZERO
+		
+		if velocity.length_squared() > WALK_MAX * WALK_MAX:
+			velocity = velocity.normalized() * WALK_MAX;
+		_sprite.rotation = gravity.angle() - PI / 2
+			
+		if velocity.dot(rightDir) > 0:
+			facing = FACING_RIGHT
+		elif velocity.dot(leftDir) > 0:
+			facing = FACING_LEFT
 	else:
 		if gravity.y != dgravity:
 			velocity += gravity * delta * gravity_damp
@@ -54,7 +80,6 @@ func _physics_process(delta):
 		_smp.set_param("facing_down", velocity.dot(gravity) > 0)
 	else:
 		_smp.set_param("facing_down", false)
-		
 		
 	move_and_slide()
 	_smp.set_param("moving", velocity.length_squared() > 0.01);
@@ -91,8 +116,8 @@ func on_transit_state(from, to):
 			gravity_damp = GRAVITY_FLYING_DAMP
 		"Glide":
 			_animation_player.play("glide");
-			if from == "Hover":
-				velocity = gravity.normalized().rotated(facing * PI / 2) * INIT_GLIDE_SPEED;
+			if from == "Hover" or from == "Falling":
+				velocity += gravity.normalized().rotated(facing * PI / 2) * INIT_GLIDE_SPEED;
 		"Flight":
 			_animation_player.play("fly");
 			gravity_damp = GRAVITY_FLYING_DAMP
@@ -101,10 +126,13 @@ func on_transit_state(from, to):
 		"Idle":
 			_animation_player.play('idle');
 		"Jump":
-			velocity = up_direction * JUMP_VELOCITY;
+			velocity += up_direction * JUMP_VELOCITY;
 		"Falling":
 			if from == "Jump" and Input.is_action_pressed("jump"):
-				_smp.set_trigger("fall_to_hover");
+				if Input.is_action_pressed("left") or Input.is_action_pressed("right"):
+					_smp.set_trigger("sideways");
+				else:
+					_smp.set_trigger("fall_to_hover");
 			else:
 				_animation_player.play("falling");
 
