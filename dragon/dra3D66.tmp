@@ -149,7 +149,7 @@ metadata/graph_offset = Vector2(2186, 202)
 [sub_resource type="Resource" id="Resource_ma1t7"]
 script = ExtResource("5_kqujb")
 name = "Glide"
-metadata/graph_offset = Vector2(1646, 362)
+metadata/graph_offset = Vector2(1606, 342)
 
 [sub_resource type="Resource" id="Resource_d5gry"]
 script = ExtResource("5_kqujb")
@@ -175,7 +175,7 @@ metadata/graph_offset = Vector2(1726, 922)
 script = ExtResource("8_v7t80")
 value = true
 comparation = 0
-name = "holding_jump"
+name = null
 
 [sub_resource type="Resource" id="Resource_853qw"]
 script = ExtResource("7_7ikg8")
@@ -223,7 +223,7 @@ priority = 0
 script = ExtResource("8_v7t80")
 value = true
 comparation = 0
-name = "on_floor"
+name = null
 
 [sub_resource type="Resource" id="Resource_sq0ja"]
 script = ExtResource("7_7ikg8")
@@ -238,7 +238,7 @@ priority = 0
 script = ExtResource("8_v7t80")
 value = true
 comparation = 0
-name = "on_wall"
+name = null
 
 [sub_resource type="Resource" id="Resource_vwleu"]
 script = ExtResource("7_7ikg8")
@@ -253,7 +253,7 @@ priority = 0
 script = ExtResource("8_v7t80")
 value = false
 comparation = 0
-name = "pitching"
+name = null
 
 [sub_resource type="Resource" id="Resource_t2wgy"]
 script = ExtResource("7_7ikg8")
@@ -268,7 +268,7 @@ priority = 0
 script = ExtResource("8_v7t80")
 value = true
 comparation = 0
-name = "on_floor"
+name = null
 
 [sub_resource type="Resource" id="Resource_ypjhi"]
 script = ExtResource("7_7ikg8")
@@ -283,7 +283,7 @@ priority = 0
 script = ExtResource("8_v7t80")
 value = true
 comparation = 0
-name = "on_wall"
+name = null
 
 [sub_resource type="Resource" id="Resource_boyam"]
 script = ExtResource("7_7ikg8")
@@ -298,7 +298,7 @@ priority = 0
 script = ExtResource("8_v7t80")
 value = true
 comparation = 0
-name = "pitching"
+name = null
 
 [sub_resource type="Resource" id="Resource_shllo"]
 script = ExtResource("7_7ikg8")
@@ -313,7 +313,7 @@ priority = 0
 script = ExtResource("8_v7t80")
 value = true
 comparation = 0
-name = "on_floor"
+name = null
 
 [sub_resource type="Resource" id="Resource_dw4iu"]
 script = ExtResource("7_7ikg8")
@@ -328,7 +328,7 @@ priority = 0
 script = ExtResource("8_v7t80")
 value = true
 comparation = 0
-name = "on_wall"
+name = null
 
 [sub_resource type="Resource" id="Resource_2mahv"]
 script = ExtResource("7_7ikg8")
@@ -369,7 +369,7 @@ priority = 0
 script = ExtResource("8_v7t80")
 value = true
 comparation = 0
-name = "on_floor"
+name = null
 
 [sub_resource type="Resource" id="Resource_kd8oy"]
 script = ExtResource("7_7ikg8")
@@ -384,7 +384,7 @@ priority = 0
 script = ExtResource("8_v7t80")
 value = false
 comparation = 0
-name = "on_floor"
+name = null
 
 [sub_resource type="Resource" id="Resource_h8bmj"]
 script = ExtResource("7_7ikg8")
@@ -399,7 +399,7 @@ priority = 0
 script = ExtResource("8_v7t80")
 value = true
 comparation = 0
-name = "holding_jump"
+name = null
 
 [sub_resource type="Resource" id="Resource_2062t"]
 script = ExtResource("7_7ikg8")
@@ -414,7 +414,7 @@ priority = 0
 script = ExtResource("8_v7t80")
 value = true
 comparation = 0
-name = "moving"
+name = null
 
 [sub_resource type="Resource" id="Resource_pieub"]
 script = ExtResource("7_7ikg8")
@@ -429,7 +429,7 @@ priority = 0
 script = ExtResource("8_v7t80")
 value = true
 comparation = 0
-name = "facing_down"
+name = null
 
 [sub_resource type="Resource" id="Resource_kh2x6"]
 script = ExtResource("7_7ikg8")
@@ -444,7 +444,7 @@ priority = 0
 script = ExtResource("8_v7t80")
 value = false
 comparation = 0
-name = "on_floor"
+name = null
 
 [sub_resource type="Resource" id="Resource_ltdfr"]
 script = ExtResource("7_7ikg8")
@@ -459,7 +459,7 @@ priority = 0
 script = ExtResource("8_v7t80")
 value = false
 comparation = 0
-name = "moving"
+name = null
 
 [sub_resource type="Resource" id="Resource_3id6n"]
 script = ExtResource("7_7ikg8")
@@ -474,7 +474,7 @@ priority = 0
 script = ExtResource("8_v7t80")
 value = true
 comparation = 0
-name = "holding_jump"
+name = null
 
 [sub_resource type="Resource" id="Resource_c1ytx"]
 script = ExtResource("7_7ikg8")
@@ -540,7 +540,7 @@ transitions = {
 "Jump": SubResource("Resource_c1ytx")
 }
 }
-name = ""
+name = null
 
 [node name="CharacterBody2D" type="CharacterBody2D"]
 script = ExtResource("1_032u5")
@@ -569,6 +569,9 @@ libraries = {
 [node name="StateMachinePlayer" type="Node" parent="."]
 script = ExtResource("3_levpd")
 state_machine = SubResource("Resource_oxabw")
+active = true
+autostart = true
+update_process_mode = 1
 
 [connection signal="transited" from="StateMachinePlayer" to="." method="on_transit_state"]
 [connection signal="updated" from="StateMachinePlayer" to="." method="_on_smp_updated"]

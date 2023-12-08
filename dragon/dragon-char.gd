@@ -43,11 +43,16 @@ func _physics_process(delta):
 	rightDir = up_direction.rotated(PI / 2)
 	
 	if state == "Glide" or state == "Flight":
-		var vang = velocity.angle_to(gravity);
-		var new_angle = sign(vang) * delta;
-		velocity = velocity.rotated(new_angle);
-		velocity += gnorm * clamp(velocity.dot(gravity), 0, 1) * GLIDE_GRAVITY_BOOST;
-		velocity *= 1 - GLIDE_FRICTION;
+		if Input.is_action_pressed("left") and facing == FACING_LEFT:
+			pass
+		elif Input.is_action_pressed("right") and facing == FACING_RIGHT:
+			pass
+		else:
+			var vang = velocity.angle_to(gravity);
+			var new_angle = sign(vang) * delta;
+			velocity = velocity.rotated(new_angle);
+			velocity += gnorm * clamp(velocity.dot(gravity), 0, 1) * GLIDE_GRAVITY_BOOST;
+			velocity *= 1 - GLIDE_FRICTION;
 		_sprite.rotation = velocity.angle()
 		if facing == FACING_LEFT:
 			_sprite.rotation += PI;
@@ -90,6 +95,13 @@ func _physics_process(delta):
 func _input(event):
 	if event.is_action_pressed("jump"):
 		_on_jump();
+
+func get_facing_direction():
+	if velocity.dot(leftDir) > 0:
+		return FACING_LEFT;
+	elif velocity.dot(rightDir) > 0:
+		return FACING_RIGHT;
+	return facing;
 
 
 func _on_jump():

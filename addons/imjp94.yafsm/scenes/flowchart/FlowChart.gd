@@ -64,8 +64,6 @@ var grid_minor_color = Color(1, 1, 1, 0.05)
 	
 
 func _init():
-	super._init()
-	
 	focus_mode = FOCUS_ALL
 	selection_stylebox.bg_color = Color(0, 0, 0, 0.3)
 	selection_stylebox.set_border_width_all(1)
