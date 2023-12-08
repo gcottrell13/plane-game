@@ -10,7 +10,7 @@ var gravity_damp: float = DEFAULT_GRAVITY_DAMP;
 
 @export var INIT_GLIDE_SPEED: float = 500;
 @export var PITCH_SPEED: float = 0.05;
-@export var GLIDE_FRICTION = 0.001;
+@export var GLIDE_FRICTION = 0.01;
 @export var GLIDE_GRAVITY_BOOST = 1.2;
 
 @export var WALK_ACCEL = 10;
@@ -22,6 +22,9 @@ var facing = FACING_RIGHT;
 
 # Get the gravity from the project settings so you can sync with rigid body nodes.
 var dgravity = ProjectSettings.get_setting("physics/2d/default_gravity")
+
+const deg10 = PI / 18;
+const deg80 = PI * 8 / 18;
 
 var state: String = "";
 
@@ -43,19 +46,26 @@ func _physics_process(delta):
 	rightDir = up_direction.rotated(PI / 2)
 	
 	if state == "Glide" or state == "Flight":
-		if Input.is_action_pressed("left") and facing == FACING_LEFT:
+		var vang = velocity.angle_to(gravity);
+		if Input.is_action_pressed("left") and facing == FACING_LEFT \
+				and deg10 < -vang and -vang < deg80:  
+			# NOTE: negative because it's going counter-clockwise
 			pass
-		elif Input.is_action_pressed("right") and facing == FACING_RIGHT:
+		elif Input.is_action_pressed("right") and facing == FACING_RIGHT \
+				and deg10 < vang and vang < deg80:
 			pass
 		else:
-			var vang = velocity.angle_to(gravity);
 			var new_angle = sign(vang) * delta;
 			velocity = velocity.rotated(new_angle);
-			velocity += gnorm * clamp(velocity.dot(gravity), 0, 1) * GLIDE_GRAVITY_BOOST;
-			velocity *= 1 - GLIDE_FRICTION;
+			if velocity.dot(gravity) > 0:
+				var vnorm = velocity.normalized();
+				velocity += gnorm * vnorm.dot(gnorm) * GLIDE_GRAVITY_BOOST;
+			else:
+				velocity *= 1 - GLIDE_FRICTION;
 		_sprite.rotation = velocity.angle()
 		if facing == FACING_LEFT:
 			_sprite.rotation += PI;
+			
 	elif state == "Walk" or state == "Idle":
 		if Input.is_action_pressed("left"):
 			velocity += leftDir * WALK_ACCEL
@@ -70,16 +80,16 @@ func _physics_process(delta):
 		if velocity.length_squared() > WALK_MAX * WALK_MAX:
 			velocity = velocity.normalized() * WALK_MAX;
 		_sprite.rotation = gravity.angle() - PI / 2
-			
-		if velocity.dot(rightDir) > 0:
-			facing = FACING_RIGHT
-		elif velocity.dot(leftDir) > 0:
-			facing = FACING_LEFT
-	else:
-		if gravity.y != dgravity:
-			velocity += gravity * delta * gravity_damp
-			velocity *= 0.95
-			_sprite.rotation = gravity.angle() - PI / 2
+		
+		facing = get_facing_from_velocity();
+		
+	elif state == "Falling" or state == "Jump" or state == "Hover":
+		velocity += gravity * delta * gravity_damp
+		var horiz = velocity.dot(get_dir_from_facing()) * get_dir_from_facing();
+		var verti = velocity.dot(up_direction) * up_direction;
+		verti *= 0.95;
+		velocity = horiz + verti;
+		_sprite.rotation = gravity.angle() - PI / 2
 			
 	if state == "Jump":
 		_smp.set_param("facing_down", velocity.dot(gravity) > 0)
@@ -96,12 +106,19 @@ func _input(event):
 	if event.is_action_pressed("jump"):
 		_on_jump();
 
-func get_facing_direction():
+func get_facing_from_velocity():
 	if velocity.dot(leftDir) > 0:
 		return FACING_LEFT;
 	elif velocity.dot(rightDir) > 0:
 		return FACING_RIGHT;
 	return facing;
+
+func get_dir_from_facing():
+	match facing:
+		FACING_LEFT:
+			return leftDir;
+		FACING_RIGHT:
+			return rightDir;
 
 
 func _on_jump():
