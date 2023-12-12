@@ -1,4 +1,4 @@
-[gd_scene load_steps=73 format=3 uid="uid://b5h6i6q8wvrja"]
+[gd_scene load_steps=75 format=3 uid="uid://b5h6i6q8wvrja"]
 
 [ext_resource type="Script" path="res://dragon/dragon-char.gd" id="1_032u5"]
 [ext_resource type="Texture2D" uid="uid://byr1eplit6cwv" path="res://dragon/indexed-dragon_black.png" id="2_7hk8l"]
@@ -15,8 +15,8 @@
 shader = ExtResource("2_e4xfh")
 shader_parameter/palette = ExtResource("3_q4qa1")
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_8udjb"]
-size = Vector2(64, 64)
+[sub_resource type="CircleShape2D" id="CircleShape2D_547i8"]
+radius = 16.0
 
 [sub_resource type="Animation" id="Animation_m8tr1"]
 length = 0.001
@@ -309,6 +309,19 @@ conditions = {
 }
 priority = 0
 
+[sub_resource type="Resource" id="Resource_eucaw"]
+script = ExtResource("6_tmfcb")
+name = "jump"
+
+[sub_resource type="Resource" id="Resource_hcvqn"]
+script = ExtResource("7_7ikg8")
+from = "Glide"
+to = "Hover"
+conditions = {
+"jump": SubResource("Resource_eucaw")
+}
+priority = 0
+
 [sub_resource type="Resource" id="Resource_jbs7c"]
 script = ExtResource("8_v7t80")
 value = true
@@ -518,6 +531,7 @@ transitions = {
 "Glide": {
 "Cling": SubResource("Resource_boyam"),
 "Flight": SubResource("Resource_shllo"),
+"Hover": SubResource("Resource_hcvqn"),
 "Walk": SubResource("Resource_dw4iu")
 },
 "Hover": {
@@ -543,6 +557,8 @@ transitions = {
 name = ""
 
 [node name="CharacterBody2D" type="CharacterBody2D"]
+floor_constant_speed = true
+floor_snap_length = 32.0
 script = ExtResource("1_032u5")
 
 [node name="Polygon2D" type="Polygon2D" parent="."]
@@ -558,7 +574,7 @@ vframes = 7
 frame = 13
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-shape = SubResource("RectangleShape2D_8udjb")
+shape = SubResource("CircleShape2D_547i8")
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 root_node = NodePath("../Sprite2D")
@@ -569,6 +585,12 @@ libraries = {
 [node name="StateMachinePlayer" type="Node" parent="."]
 script = ExtResource("3_levpd")
 state_machine = SubResource("Resource_oxabw")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+ignore_rotation = false
+zoom = Vector2(2, 2)
+rotation_smoothing_enabled = true
+editor_draw_drag_margin = true
 
 [connection signal="transited" from="StateMachinePlayer" to="." method="on_transit_state"]
 [connection signal="updated" from="StateMachinePlayer" to="." method="_on_smp_updated"]

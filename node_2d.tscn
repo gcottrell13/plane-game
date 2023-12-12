@@ -1,22 +1,17 @@
-[gd_scene load_steps=6 format=3 uid="uid://clw1fcci3j7ea"]
+[gd_scene load_steps=5 format=3 uid="uid://clw1fcci3j7ea"]
 
 [ext_resource type="Script" path="res://node_2d.gd" id="1_dy5n7"]
 [ext_resource type="PackedScene" uid="uid://b5h6i6q8wvrja" path="res://dragon/dragon-char.tscn" id="2_dweuj"]
+[ext_resource type="TileSet" uid="uid://cp1v3s7q7gj7f" path="res://tileset1.tres" id="3_lwvyp"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_dox05"]
 size = Vector2(1184, 672)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_55peu"]
-size = Vector2(1198, 86)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_7g8ja"]
-size = Vector2(210, 64)
 
 [node name="MainScene" type="Node2D"]
 script = ExtResource("1_dy5n7")
 
 [node name="Dragon" parent="." instance=ExtResource("2_dweuj")]
-position = Vector2(136, 128)
+position = Vector2(792, 352)
 INIT_GLIDE_SPEED = 100.0
 
 [node name="Area2D" type="Area2D" parent="."]
@@ -28,21 +23,7 @@ gravity = 900.0
 position = Vector2(582, 326)
 shape = SubResource("RectangleShape2D_dox05")
 
-[node name="RigidBody2D" type="RigidBody2D" parent="."]
-position = Vector2(555, 648)
-freeze = true
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="RigidBody2D"]
-position = Vector2(33, 6)
-shape = SubResource("RectangleShape2D_55peu")
-
-[node name="Polygon2D" type="Polygon2D" parent="RigidBody2D"]
-position = Vector2(-553, -612)
-polygon = PackedVector2Array(-3, 572, 1160, 575, 1154, 652, -2, 649)
-
-[node name="CollisionShape2D2" type="CollisionShape2D" parent="RigidBody2D"]
-position = Vector2(-460, -275)
-shape = SubResource("RectangleShape2D_7g8ja")
-
-[node name="Polygon2D2" type="Polygon2D" parent="RigidBody2D"]
-polygon = PackedVector2Array(-566, -307, -356, -306, -353, -243, -566, -243)
+[node name="TileMap" type="TileMap" parent="."]
+tile_set = ExtResource("3_lwvyp")
+format = 2
+layer_0/tile_data = PackedInt32Array(589824, 2, 1, 589825, 2, 0, 589826, 2, 2, 589827, 2, 2, 589828, 2, 1, 589829, 2, 1, 589830, 2, 0, 589831, 2, 0, 589832, 2, 2, 589833, 2, 1, 589834, 2, 2, 589835, 2, 0, 589836, 2, 2, 589837, 2, 1, 589838, 2, 0, 589839, 2, 0, 589840, 2, 2, 589841, 2, 0, 524305, 2, 0, 524304, 2, 1, 524303, 2, 2, 524302, 2, 2, 524301, 2, 1, 524300, 2, 2, 524299, 2, 1, 524298, 2, 0, 524297, 2, 1, 524296, 2, 2, 524295, 2, 0, 524294, 2, 2, 524293, 2, 0, 524292, 2, 0, 524291, 2, 0, 524290, 2, 0, 524289, 2, 2, 524288, 2, 2, 458752, 131074, 0, 458753, 131074, 0, 458754, 131074, 0, 458755, 131074, 0, 458756, 65538, 2, 458757, 2, 1, 393221, 131074, 0, 393222, 131074, 0, 393223, 131074, 0, 393224, 131074, 0, 393225, 131074, 0, 393226, 131074, 0, 458762, 2, 0, 458763, 131074, 2, 458764, 131074, 0, 458765, 131074, 0, 458766, 131074, 0, 458767, 131074, 0, 458768, 131074, 0, 458769, 131074, 0, 458770, 393218, 0, 458771, 393218, 0, 458772, 393218, 0, 458773, 458754, 0, 458758, 2, 2, 458759, 2, 1, 458760, 2, 1, 458761, 2, 0, 393220, 65538, 1, 393227, 131074, 1, 524287, 327682, 0)
