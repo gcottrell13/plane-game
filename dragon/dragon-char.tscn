@@ -195,14 +195,14 @@ priority = 0
 
 [sub_resource type="Resource" id="Resource_as2xe"]
 script = ExtResource("6_tmfcb")
-name = "sideways"
+name = "glide"
 
 [sub_resource type="Resource" id="Resource_7eohn"]
 script = ExtResource("7_7ikg8")
 from = "Falling"
 to = "Glide"
 conditions = {
-"sideways": SubResource("Resource_as2xe")
+"glide": SubResource("Resource_as2xe")
 }
 priority = 0
 
@@ -354,27 +354,27 @@ priority = 0
 
 [sub_resource type="Resource" id="Resource_hfc8k"]
 script = ExtResource("6_tmfcb")
-name = "glide"
+name = "fall"
 
 [sub_resource type="Resource" id="Resource_3ouqf"]
 script = ExtResource("7_7ikg8")
 from = "Hover"
 to = "Falling"
 conditions = {
-"glide": SubResource("Resource_hfc8k")
+"fall": SubResource("Resource_hfc8k")
 }
 priority = 0
 
 [sub_resource type="Resource" id="Resource_scfei"]
 script = ExtResource("6_tmfcb")
-name = "sideways"
+name = "glide"
 
 [sub_resource type="Resource" id="Resource_bh2iq"]
 script = ExtResource("7_7ikg8")
 from = "Hover"
 to = "Glide"
 conditions = {
-"sideways": SubResource("Resource_scfei")
+"glide": SubResource("Resource_scfei")
 }
 priority = 0
 
@@ -558,7 +558,9 @@ name = ""
 
 [node name="CharacterBody2D" type="CharacterBody2D"]
 floor_constant_speed = true
-floor_snap_length = 32.0
+floor_max_angle = 1.0472
+floor_snap_length = 100.0
+safe_margin = 3.0
 script = ExtResource("1_032u5")
 
 [node name="Polygon2D" type="Polygon2D" parent="."]

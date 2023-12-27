@@ -2,9 +2,11 @@ extends CharacterBody2D
 
 
 @export var SPEED = 300.0
-@export var JUMP_VELOCITY = 600.0
+@export var JUMP_VELOCITY = 300.0
 
 @export var MAX_FALL_SPEED = 500;
+@export var MAX_FALL_HORIZ_SPEED = 100;
+@export var FALL_HORIZ_ACCEL = 200;
 
 @export var GRAVITY_FLYING_DAMP: float = 0.1;
 const DEFAULT_GRAVITY_DAMP = 1;
@@ -13,7 +15,7 @@ var gravity_damp: float = DEFAULT_GRAVITY_DAMP;
 @export var INIT_GLIDE_SPEED: float = 500;
 @export var PITCH_SPEED: float = 0.05;
 @export var GLIDE_MAX_SPEED: float = 300;
-@export var GLIDE_FRICTION = 1.5;
+@export var GLIDE_FRICTION = 200;
 @export var GLIDE_ACCEL = 600;
 @export var MIN_FLIGHT_SPEED_CONTROL = 20;
 
@@ -39,11 +41,14 @@ var is_hold_gliding = false;
 var spriteRotation: Vector2 = Vector2.RIGHT;
 
 var gravity: Vector2 = Vector2.ZERO;
-var leftDir: Vector2 = Vector2.ZERO;
-var rightDir: Vector2 = Vector2.ZERO;
 
 var floorNormal: Vector2 = Vector2.ZERO;
 var pvel = Vector2.ZERO;
+
+var holding_glide_angle = -1;
+
+var local_velocity = Vector2.ZERO;
+var local_rotation = Vector2.RIGHT;
 
 @onready var _animation_player = $AnimationPlayer
 @onready var _smp = $StateMachinePlayer
@@ -54,83 +59,111 @@ var pvel = Vector2.ZERO;
 const MAX_ZOOM = 1.7;
 const MIN_ZOOM = 0.5;
 var prev_camerazoom = MAX_ZOOM;
+var previous_up_direction = Vector2.UP;
 
 func _physics_process(delta):
 	var gnorm = get_gravity();
 	handle_camera(gnorm, delta);
 	
-	leftDir = up_direction.rotated(-PI / 2)
-	rightDir = up_direction.rotated(PI / 2)
+	var LEFT = Vector2.LEFT;
+	var RIGHT = Vector2.RIGHT;
+	var UP = Vector2.UP;
+	var DOWN = Vector2.DOWN;
 	
 	var lr_direction = Input.get_axis("left", "right");
-	var lr_vec = lr_direction * rightDir;
+	var lr_vec = lr_direction * RIGHT;
 	
 	var ud_direction = Input.get_axis("down", "up");
-	var ud_vec = ud_direction * up_direction;
+	var ud_vec = ud_direction * UP;
 	
 	if state == "Glide" or state == "Flight":
-		var vang = velocity.angle_to(gnorm) * facing;
-		if facing == lr_direction and deg10 < vang and vang < deg80:  
+		var vang = local_velocity.angle_to(DOWN) * facing;
+		var holding = facing == lr_direction and deg10 < vang and vang < deg80;
+		var speed = local_velocity.length();
+		
+		var pitching = false;
+		if ud_direction != 0:
+			local_rotation = local_rotation.rotated(facing * PITCH_SPEED * -ud_direction);
+			pitching = true;
+			
+		if holding:
 			set_hold_glide(true)
 		else:
 			set_hold_glide(false)
-			velocity = rotate_toward_vec2(velocity, gnorm * GLIDE_MAX_SPEED, GLIDE_FRICTION * delta);
-		
-		var speed = velocity.length();
-		var pitching = false;
-		if ud_direction != 0:
-			spriteRotation = spriteRotation.rotated(facing * PITCH_SPEED * -ud_direction);
-			pitching = true;
+			holding_glide_angle = -1;
+			local_velocity.y = move_toward(local_velocity.y, GLIDE_MAX_SPEED, GLIDE_FRICTION * delta);
 			
 		if speed > MIN_FLIGHT_SPEED_CONTROL:
-			var rotationDiff = abs(spriteRotation.angle_to(velocity) / (PI / 4));
+			var rotationDiff = abs(local_rotation.angle_to(velocity) / (PI / 4));
 			if rotationDiff <= 1:
 				var control = 1 - rotationDiff;
 				if not pitching:
-					var ang = spriteRotation.angle_to(velocity) * control;
-					spriteRotation = spriteRotation.rotated(ang);
+					var ang = local_rotation.angle_to(velocity) * control;
+					local_rotation = local_rotation.rotated(ang);
 				else:
-					var angle = velocity.angle_to(spriteRotation);
-					velocity = velocity.rotated(control * angle);
-		
-		_sprite.rotation = spriteRotation.angle();
+					var angle = velocity.angle_to(local_rotation);
+					local_velocity = local_velocity.rotated(control * angle);
+				
+		_sprite.rotation = get_sprite_rotation().angle();
 		if facing == FACING_LEFT:
 			_sprite.rotation += PI;
 			
 	elif state == "Walk" or state == "Idle":
 		if lr_direction != 0:
-			velocity = velocity.move_toward(lr_vec * WALK_MAX, WALK_ACCEL * delta);
+			local_velocity.x = move_toward(local_velocity.x, WALK_MAX * lr_direction, WALK_ACCEL * delta);
+			local_velocity.y += 1;
 		else:
-			velocity = velocity.move_toward(Vector2.ZERO, WALK_ACCEL * delta);
-		_sprite.rotation = gravity.angle() + get_floor_angle(up_direction) - PI / 2
+			local_velocity.x = move_toward(local_velocity.x, 0, WALK_ACCEL * delta);
+			local_velocity.y += 1;
 		facing = get_facing_from_velocity();
 		
 	elif state == "Falling" or state == "Jump":
-		var horiz = velocity.dot(get_dir_from_facing()) * get_dir_from_facing();
-		var verti = velocity.dot(up_direction) * up_direction;
-		verti = verti.move_toward(gnorm * MAX_FALL_SPEED, gravity.length() * delta);
-		velocity = horiz + verti;
+		local_velocity.y = move_toward(local_velocity.y, MAX_FALL_SPEED, gravity.length() * delta);
+		local_velocity.x = move_toward(local_velocity.x, lr_direction * MAX_FALL_HORIZ_SPEED, FALL_HORIZ_ACCEL * delta);
 		_sprite.rotation = gravity.angle() - PI / 2
+		facing = get_facing_from_velocity();
 		
 	elif state == "Hover":
 		if lr_direction != 0 or ud_direction != 0:
 			var target_velocity = (lr_vec + ud_vec) * HOVER_MAX;
-			velocity = velocity.move_toward(target_velocity, HOVER_ACCEL * delta);
+			local_velocity = local_velocity.move_toward(target_velocity, HOVER_ACCEL * delta);
 		else:
-			velocity = velocity.move_toward(Vector2.ZERO, HOVER_ACCEL * delta);
+			local_velocity = local_velocity.move_toward(Vector2.ZERO, HOVER_ACCEL * delta);
 		facing = get_facing_from_velocity();
 		_sprite.rotation = gravity.angle() - PI / 2
 			
 	if state == "Jump":
-		_smp.set_param("facing_down", velocity.dot(gravity) > 0)
+		_smp.set_param("facing_down", local_velocity.y > 0)
 	else:
 		_smp.set_param("facing_down", false)
 		
+	set_split_velocity();
+	
 	move_and_slide()
-	_smp.set_param("moving", velocity.length_squared() > 0.01);
+	
+	local_velocity = velocity.rotated(up_direction.angle_to(Vector2.UP));
+	
+	_smp.set_param("moving", local_velocity.length_squared() > 0.01);
 	_smp.set_param("on_floor", is_on_floor())
 	_smp.set_param("holding_jump", Input.is_action_pressed("jump"));
+	
+	if is_on_floor():
+		_sprite.rotation = get_floor_normal().angle() + PI / 2;
 
+func set_split_velocity():
+	var angle = up_direction.angle_to(Vector2.UP);
+	
+	if previous_up_direction != up_direction:
+		var gravity_change = previous_up_direction.angle_to(up_direction);
+		angle += gravity_change;
+	previous_up_direction = up_direction;
+	
+	velocity = local_velocity.rotated(-angle);
+
+func get_sprite_rotation():
+	#var angle = up_direction.angle_to(Vector2.UP);
+	#return local_rotation.rotated(angle);
+	return local_rotation
 
 func get_gravity():
 	var rid = get_rid()
@@ -150,18 +183,11 @@ func _input(event):
 		_on_jump();
 
 func get_facing_from_velocity():
-	if velocity.dot(leftDir) > 0:
+	if local_velocity.x < 0:
 		return FACING_LEFT;
-	elif velocity.dot(rightDir) > 0:
+	elif local_velocity.x > 0:
 		return FACING_RIGHT;
 	return facing;
-
-func get_dir_from_facing():
-	match facing:
-		FACING_LEFT:
-			return leftDir;
-		FACING_RIGHT:
-			return rightDir;
 
 func handle_camera(gnorm: Vector2, delta: float):
 	_camera.rotation = gnorm.angle() - PI / 2;
@@ -170,15 +196,6 @@ func handle_camera(gnorm: Vector2, delta: float):
 	prev_camerazoom = new_camerazoom;
 	_camera.zoom = Vector2(new_camerazoom, new_camerazoom);
 			
-func _draw():
-	if state == "Walk" or state == "Idle":
-		var ang = up_direction.angle_to(floorNormal);
-		var _left = leftDir.rotated(ang);
-		var _right = rightDir.rotated(ang);
-		#draw_line(Vector2.ZERO, _left*100, Color.RED);
-		#draw_line(Vector2.ZERO, _right*100, Color.BLUE);
-		#draw_line(Vector2.ZERO, floorNormal*100, Color.WHITE);
-		#draw_line(Vector2.ZERO, pvel.normalized() * 100, Color.GREEN);
 
 func set_hold_glide(b: bool):
 	if state != "Glide":
@@ -193,18 +210,25 @@ func set_hold_glide(b: bool):
 
 
 func _on_jump():
-	if state == "Hover":
-		if Input.is_action_pressed("left") or Input.is_action_pressed("right"):
-			if Input.is_action_pressed("left"):
-				facing = FACING_LEFT
+	match state:
+		"Hover":
+			var lr = Input.get_axis("left", "right");
+			if lr != 0:
+				facing = lr;
+				_smp.set_trigger("glide")
+			elif Input.is_action_pressed("down"):
+				_smp.set_trigger("fall");
 			else:
-				facing = FACING_RIGHT
-			_smp.set_trigger("sideways")
-		else:
-			_smp.set_trigger("glide")
-	else:
-		_smp.set_trigger("fall_to_hover")
-		_smp.set_trigger("jump")
+				_smp.set_trigger("glide")
+		"Falling":
+			var glide_from_fall = Input.get_axis("left", "right")
+			if glide_from_fall != 0:
+				facing = FACING_RIGHT * glide_from_fall;
+				_smp.set_trigger("glide");
+			else:
+				_smp.set_trigger("fall_to_hover")
+		_:
+			_smp.set_trigger("jump")
 	
 
 func on_transit_state(from, to):
@@ -217,8 +241,8 @@ func on_transit_state(from, to):
 		"Glide":
 			_animation_player.play("glide");
 			if from == "Hover" or from == "Falling":
-				velocity += up_direction.rotated(facing * PI / 2) * INIT_GLIDE_SPEED;
-				spriteRotation = velocity.normalized();
+				local_velocity += Vector2.RIGHT * facing * INIT_GLIDE_SPEED;
+				local_rotation = velocity.normalized();
 		"Flight":
 			_animation_player.play("fly");
 			gravity_damp = GRAVITY_FLYING_DAMP
@@ -227,13 +251,11 @@ func on_transit_state(from, to):
 		"Idle":
 			_animation_player.play('idle');
 		"Jump":
-			velocity += up_direction * JUMP_VELOCITY;
+			local_velocity.y -= JUMP_VELOCITY;
 		"Falling":
 			if from == "Jump" and Input.is_action_pressed("jump"):
 				if Input.is_action_pressed("left") or Input.is_action_pressed("right"):
-					_smp.set_trigger("sideways");
-				elif Input.is_action_just_pressed("down"):
-					_smp.set_trigger("sideways");
+					_smp.set_trigger("glide");
 				else:
 					_smp.set_trigger("fall_to_hover");
 			else:
@@ -252,9 +274,8 @@ func _on_smp_updated(state, delta):
 			elif Input.is_action_pressed("down"):
 				_smp.set_param("pitching", true);
 		"Hover":
-			#if Input.is_action_pressed("jump"):
-				#_smp.set_trigger("glide")
-			pass
+			if Input.is_action_pressed("jump") and Input.is_action_pressed("down"):
+				_smp.set_trigger("fall");
 		"Flight":
 			if Input.is_action_pressed("up"):
 				_smp.set_param("pitching", true);

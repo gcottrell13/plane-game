@@ -20,6 +20,7 @@ polygon = PackedVector2Array(335, 248, 366, 218, 408, 226, 422, 244, 432, 268, 4
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="RigidBody2D"]
 shape = SubResource("CircleShape2D_x2apq")
+debug_color = Color(0, 0.6, 0.701961, 0.419608)
 
 [node name="Area2D" type="Area2D" parent="."]
 gravity_space_override = 3
@@ -30,3 +31,7 @@ gravity = 4096.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
 shape = SubResource("CircleShape2D_0v2k0")
+
+[node name="Polygon2D" type="Polygon2D" parent="."]
+color = Color(1, 1, 1, 0.105882)
+polygon = PackedVector2Array(-464, -272, -520, -144, -536, 0, -520, 136, -464, 272, -392, 376, -272, 464, -144, 512, -8, 536, 144, 520, 272, 464, 376, 376, 464, 264, 520, 136, 544, 8, 512, -152, 464, -272, 384, -376, 272, -464, 136, -520, 0, -536, -136, -520, -272, -464, -376, -384)
