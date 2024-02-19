@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://cvqbm443qlmcj"]
+
+[ext_resource type="Script" path="res://dragon/StaminaMeter.gd" id="1_cr5mw"]
+
+[node name="StaminaMeter" type="Node2D"]
+position = Vector2(-48, 0)
+script = ExtResource("1_cr5mw")

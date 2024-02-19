@@ -50,9 +50,8 @@ var holding_glide_angle = -1;
 var local_velocity = Vector2.ZERO;
 var local_rotation = Vector2.RIGHT;
 
-@onready var _animation_player = $AnimationPlayer
 @onready var _smp = $StateMachinePlayer
-@onready var _sprite = $Sprite2D
+@onready var _sprite = $Sprite
 @onready var _camera = $Camera2D
 @onready var _collision = $CollisionShape2D
 
@@ -70,11 +69,13 @@ func _physics_process(delta):
 	var UP = Vector2.UP;
 	var DOWN = Vector2.DOWN;
 	
-	var lr_direction = Input.get_axis("left", "right");
+	var lr_direction: float = Input.get_axis("left", "right");
 	var lr_vec = lr_direction * RIGHT;
 	
-	var ud_direction = Input.get_axis("down", "up");
+	var ud_direction: float = Input.get_axis("down", "up");
 	var ud_vec = ud_direction * UP;
+	
+	var velocity_x_before = local_velocity.x;
 	
 	if state == "Glide" or state == "Flight":
 		var vang = local_velocity.angle_to(DOWN) * facing;
@@ -103,7 +104,7 @@ func _physics_process(delta):
 				else:
 					var angle = velocity.angle_to(local_rotation);
 					local_velocity = local_velocity.rotated(control * angle);
-				
+		
 		_sprite.rotation = get_sprite_rotation().angle();
 		if facing == FACING_LEFT:
 			_sprite.rotation += PI;
@@ -124,6 +125,11 @@ func _physics_process(delta):
 		facing = get_facing_from_velocity();
 		
 	elif state == "Hover":
+		if ud_vec == Vector2.UP:
+			on_drain_stamina(1.0);
+		elif lr_direction != 0:
+			on_drain_stamina(0.5);
+		
 		if lr_direction != 0 or ud_direction != 0:
 			var target_velocity = (lr_vec + ud_vec) * HOVER_MAX;
 			local_velocity = local_velocity.move_toward(target_velocity, HOVER_ACCEL * delta);
@@ -136,6 +142,9 @@ func _physics_process(delta):
 		_smp.set_param("facing_down", local_velocity.y > 0)
 	else:
 		_smp.set_param("facing_down", false)
+	
+	#if sign(velocity_x_before) != sign(local_velocity.x) && local_velocity.x != 0:
+		#signal_velocity_x_dir.emit(sign(local_velocity.x))
 		
 	set_split_velocity();
 	
@@ -143,12 +152,36 @@ func _physics_process(delta):
 	
 	local_velocity = velocity.rotated(up_direction.angle_to(Vector2.UP));
 	
-	_smp.set_param("moving", local_velocity.length_squared() > 0.01);
+	if _smp.get_param("on_floor") != is_on_floor():
+		match is_on_floor():
+			true:
+				signal_falling.emit();
+			false:
+				signal_running.emit();
+				
+	var new_is_moving = abs(local_velocity.x) > 0.01;
+	if _smp.get_param("moving") != new_is_moving:
+		match new_is_moving:
+			true:
+				signal_move_horizontal.emit();
+			false:
+				signal_stop_horizontal.emit();
+	
+	if _smp.get_param("facing") != facing:
+		match facing:
+			FACING_LEFT:
+				signal_set_facing.emit(-1);
+			FACING_RIGHT:
+				signal_set_facing.emit(1);
+				
+	_smp.set_param("moving", new_is_moving);
 	_smp.set_param("on_floor", is_on_floor())
 	_smp.set_param("holding_jump", Input.is_action_pressed("jump"));
+	_smp.set_param("facing", facing);
 	
 	if is_on_floor():
 		_sprite.rotation = get_floor_normal().angle() + PI / 2;
+
 
 func set_split_velocity():
 	var angle = up_direction.angle_to(Vector2.UP);
@@ -201,9 +234,9 @@ func set_hold_glide(b: bool):
 	if state != "Glide":
 		return
 	if b and not is_hold_gliding:
-		_animation_player.play("fly");
+		signal_flapping.emit()
 	elif not b and is_hold_gliding:
-		_animation_player.play("glide");
+		signal_gliding.emit()
 	else:
 		return
 	is_hold_gliding = b
@@ -218,8 +251,6 @@ func _on_jump():
 				_smp.set_trigger("glide")
 			elif Input.is_action_pressed("down"):
 				_smp.set_trigger("fall");
-			else:
-				_smp.set_trigger("glide")
 		"Falling":
 			var glide_from_fall = Input.get_axis("left", "right")
 			if glide_from_fall != 0:
@@ -236,22 +267,23 @@ func on_transit_state(from, to):
 	state = to;
 	match to:
 		"Hover":
-			_animation_player.play("hover")
+			signal_hover.emit()
 			gravity_damp = GRAVITY_FLYING_DAMP
 		"Glide":
-			_animation_player.play("glide");
+			signal_gliding.emit()
 			if from == "Hover" or from == "Falling":
 				local_velocity += Vector2.RIGHT * facing * INIT_GLIDE_SPEED;
 				local_rotation = velocity.normalized();
 		"Flight":
-			_animation_player.play("fly");
+			signal_flapping.emit()
 			gravity_damp = GRAVITY_FLYING_DAMP
 		"Walk":
-			_animation_player.play("hover");
+			signal_running.emit();
 		"Idle":
-			_animation_player.play('idle');
+			signal_stop_horizontal.emit();
 		"Jump":
 			local_velocity.y -= JUMP_VELOCITY;
+			signal_jump.emit();
 		"Falling":
 			if from == "Jump" and Input.is_action_pressed("jump"):
 				if Input.is_action_pressed("left") or Input.is_action_pressed("right"):
@@ -259,15 +291,16 @@ func on_transit_state(from, to):
 				else:
 					_smp.set_trigger("fall_to_hover");
 			else:
-				_animation_player.play("falling");
+				signal_falling.emit()
 
 func _on_smp_updated(state, delta):
-	_sprite.flip_h = (facing == FACING_LEFT);
 	match state:
 		"Cling":
 			pass
+		"Idle":
+			on_drain_stamina(-1.0);
 		"Walk":
-			pass
+			on_drain_stamina(-0.5);
 		"Glide":
 			if Input.is_action_pressed("up"):
 				_smp.set_param("pitching", true);
@@ -283,3 +316,31 @@ func _on_smp_updated(state, delta):
 				_smp.set_param("pitching", true);
 			else:
 				_smp.set_param("pitching", false);
+
+
+signal signal_move_horizontal();
+signal signal_stop_horizontal();
+signal signal_falling();
+signal signal_walking();
+signal signal_running();
+signal signal_set_facing(facing: int);
+signal signal_jump();
+signal signal_hover();
+signal signal_gliding();
+signal signal_flapping();
+signal signal_hurt();
+signal signal_dead();
+
+
+
+var MAX_STAMINA = 1000;
+var STAMINA_PER_BAR: float = 1000;
+var stamina: float = MAX_STAMINA;
+var stamina_drain_rate: float = -2;
+signal stamina_depleted(new_value: float, max: float);
+func on_drain_stamina(multiplier: float = 1.0):
+	var new_stamina = clamp(stamina + stamina_drain_rate * multiplier, 0, MAX_STAMINA);
+	if new_stamina != stamina:
+		stamina = new_stamina;
+		stamina_depleted.emit(stamina, STAMINA_PER_BAR);
+

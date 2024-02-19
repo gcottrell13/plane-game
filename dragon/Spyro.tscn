@@ -1,0 +1,18 @@
+[gd_scene load_steps=5 format=3 uid="uid://583b68annjfi"]
+
+[ext_resource type="Shader" path="res://dragon/Spyro.gdshader" id="1_kxhaa"]
+[ext_resource type="Texture2D" uid="uid://dvkrdd5n04s4h" path="res://dragon/spyrosheet.png" id="1_n0nu5"]
+[ext_resource type="Script" path="res://dragon/Spyro.gd" id="3_1ad2h"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_0bmif"]
+shader = ExtResource("1_kxhaa")
+shader_parameter/debug = true
+
+[node name="Spyro" type="Sprite2D"]
+texture_filter = 1
+material = SubResource("ShaderMaterial_0bmif")
+texture = ExtResource("1_n0nu5")
+hframes = 17
+vframes = 25
+frame = 38
+script = ExtResource("3_1ad2h")
